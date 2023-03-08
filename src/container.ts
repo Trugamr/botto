@@ -9,7 +9,7 @@ const intents = [GatewayIntentBits.Guilds]
 const container = new Container()
 
 // Config
-container.bind(TYPES.Config).to(Config)
+container.bind(TYPES.Config).to(Config).inSingletonScope()
 
 // Bot
 const config = container.get<Config>(TYPES.Config)
