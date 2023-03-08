@@ -7,9 +7,11 @@ specifiers:
   discord.js: ^14.7.1
   dotenv: ^16.0.3
   eslint: ^8.35.0
+  inversify: ^6.0.1
   nodemon: ^2.0.21
   npm-run-all: ^4.1.5
   prettier: ^2.8.4
+  reflect-metadata: ^0.1.13
   rimraf: ^4.3.1
   ts-node: ^10.9.1
   typescript: ^4.9.5
@@ -18,7 +20,9 @@ specifiers:
 dependencies:
   discord.js: 14.7.1
   dotenv: 16.0.3
+  inversify: 6.0.1
   npm-run-all: 4.1.5
+  reflect-metadata: 0.1.13
   zod: 3.21.4
 
 devDependencies:
@@ -1115,6 +1119,10 @@ packages:
       side-channel: 1.0.4
     dev: false
 
+  /inversify/6.0.1:
+    resolution: {integrity: sha512-B3ex30927698TJENHR++8FfEaJGqoWOgI6ZY5Ht/nLUsFCwHn6akbwtnUAPCgUepAnTpe2qHxhDNjoKLyz6rgQ==}
+    dev: false
+
   /is-array-buffer/3.0.2:
     resolution: {integrity: sha512-y+FyyR/w8vfIRq4eQcM1EYgSTnmHXPqaF+IgzgraytCFq5Xh8lllDVmAZolPJiZttZLeFSINPYMaEJ7/vWUa1w==}
     dependencies:
@@ -1619,6 +1627,10 @@ packages:
     dependencies:
       picomatch: 2.3.1
     dev: true
+
+  /reflect-metadata/0.1.13:
+    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+    dev: false
 
   /regexp.prototype.flags/1.4.3:
     resolution: {integrity: sha512-fjggEOO3slI6Wvgjwflkc4NFRCTZAu5CnNfBd5qOMYhWdn67nJBBu34/TkD++eeFmd8C9r9jfXJ27+nSiRkSUA==}
