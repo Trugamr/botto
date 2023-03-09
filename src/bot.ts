@@ -1,4 +1,4 @@
-import { Client, Collection, REST, Routes } from 'discord.js'
+import { Client, Collection, Events, REST, Routes } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
@@ -39,11 +39,11 @@ export default class Bot {
     this.logger.info(`Registered ${parsed.length} slash command(s)`)
 
     // Add event listeners
-    this.client.on('ready', client => {
+    this.client.on(Events.ClientReady, client => {
       this.logger.info(`Logged in as ${client.user.tag}`)
     })
 
-    this.client.on('interactionCreate', async interaction => {
+    this.client.on(Events.InteractionCreate, async interaction => {
       if (interaction.isChatInputCommand()) {
         const command = this.commands.get(interaction.commandName)
         if (!command) {
