@@ -3,6 +3,7 @@ import Config from './services/config.js'
 import TYPES from './types.js'
 import Bot from './bot.js'
 import { Client, GatewayIntentBits, REST } from 'discord.js'
+import Ping from './commands/ping.js'
 
 const intents = [GatewayIntentBits.Guilds]
 
@@ -20,5 +21,11 @@ container
   )
 container.bind(TYPES.Client).toConstantValue(new Client({ intents }))
 container.bind(TYPES.Bot).to(Bot).inSingletonScope()
+
+// Commands
+const commands = [Ping]
+for (const command of commands) {
+  container.bind(TYPES.Command).to(command).inSingletonScope()
+}
 
 export default container

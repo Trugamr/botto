@@ -1,26 +1,27 @@
-import { Client, REST, Routes } from 'discord.js'
+import { Client, Collection, REST, Routes } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import Config from './services/config.js'
 import TYPES from './types.js'
 import { z } from 'zod'
-
-// TODO: Add pazazz to registering and logging logs
-
-// TODO: Setup command structure
-const commands = [
-  {
-    name: 'ping',
-    description: 'responds with pong',
-  },
-]
+import Command from './command.js'
+import container from './container.js'
+import invariant from 'tiny-invariant'
 
 @injectable()
 export default class Bot {
+  private readonly commands = new Collection<string, Command>()
+
   constructor(
     @inject(TYPES.Config) private readonly config: Config,
     @inject(TYPES.Client) private readonly client: Client,
     @inject(TYPES.Rest) private readonly rest: REST,
-  ) {}
+  ) {
+    const commands = container.getAll<Command>(TYPES.Command)
+    for (const command of commands) {
+      invariant(command.builder.name, 'commmand name is required')
+      this.commands.set(command.builder.name, command)
+    }
+  }
 
   async register() {
     // TODO: Add config option to register only if required
@@ -29,7 +30,7 @@ export default class Bot {
     const result = await this.rest.put(
       Routes.applicationCommands(this.config.get('DISCORD_CLIENT_ID')),
       {
-        body: commands,
+        body: this.commands.map(command => command.builder.toJSON()),
       },
     )
     const parsed = await z.array(z.unknown()).parseAsync(result)
@@ -42,9 +43,12 @@ export default class Bot {
 
     this.client.on('interactionCreate', async interaction => {
       if (interaction.isChatInputCommand()) {
-        if (interaction.commandName === 'ping') {
-          await interaction.reply('pong')
+        const command = this.commands.get(interaction.commandName)
+        if (!command) {
+          // TODO: Send error message instead
+          return
         }
+        command.handle(interaction)
       }
     })
 

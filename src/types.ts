@@ -1,8 +1,9 @@
 const TYPES = {
+  Config: Symbol('Config'),
   Rest: Symbol('Rest'),
   Client: Symbol('Client'),
   Bot: Symbol('Bot'),
-  Config: Symbol('Config'),
+  Command: Symbol('Command'),
 }
 
 export default TYPES
