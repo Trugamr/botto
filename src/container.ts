@@ -1,8 +1,8 @@
 import { Container } from 'inversify'
+import { Client, GatewayIntentBits, REST } from 'discord.js'
 import Config from './services/config.js'
 import TYPES from './types.js'
 import Bot from './bot.js'
-import { Client, GatewayIntentBits, REST } from 'discord.js'
 import Ping from './commands/ping.js'
 
 const intents = [GatewayIntentBits.Guilds]

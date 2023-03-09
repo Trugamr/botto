@@ -1,11 +1,11 @@
 import { Client, Collection, REST, Routes } from 'discord.js'
 import { inject, injectable } from 'inversify'
+import { z } from 'zod'
+import invariant from 'tiny-invariant'
 import Config from './services/config.js'
 import TYPES from './types.js'
-import { z } from 'zod'
 import Command from './command.js'
 import container from './container.js'
-import invariant from 'tiny-invariant'
 
 @injectable()
 export default class Bot {
