@@ -1,6 +1,6 @@
 import { Interaction, SlashCommandBuilder } from 'discord.js'
-import Command from '../command.js'
 import { injectable } from 'inversify'
+import Command from '../command.js'
 
 @injectable()
 export default class Ping implements Command {

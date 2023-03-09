@@ -1,5 +1,5 @@
-import { z } from 'zod'
 import { injectable } from 'inversify'
+import { z } from 'zod'
 
 const schema = z.object({
   DISCORD_CLIENT_ID: z.string().nonempty(),

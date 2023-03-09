@@ -1,17 +1,19 @@
 import { Client, Collection, REST, Routes } from 'discord.js'
 import { inject, injectable } from 'inversify'
-import { z } from 'zod'
 import invariant from 'tiny-invariant'
-import Config from './services/config.js'
-import TYPES from './types.js'
+import { z } from 'zod'
 import Command from './command.js'
 import container from './container.js'
+import Config from './services/config.js'
+import type { Logger } from './services/logger.js'
+import TYPES from './types.js'
 
 @injectable()
 export default class Bot {
   private readonly commands = new Collection<string, Command>()
 
   constructor(
+    @inject(TYPES.Logger) private readonly logger: Logger,
     @inject(TYPES.Config) private readonly config: Config,
     @inject(TYPES.Client) private readonly client: Client,
     @inject(TYPES.Rest) private readonly rest: REST,
@@ -26,7 +28,7 @@ export default class Bot {
   async register() {
     // TODO: Add config option to register only if required
     // Register all slash commands
-    console.log('Registering slash command(s)')
+    this.logger.info('Registering slash command(s)')
     const result = await this.rest.put(
       Routes.applicationCommands(this.config.get('DISCORD_CLIENT_ID')),
       {
@@ -34,11 +36,11 @@ export default class Bot {
       },
     )
     const parsed = await z.array(z.unknown()).parseAsync(result)
-    console.log(`Registered ${parsed.length} slash command(s)`)
+    this.logger.info(`Registered ${parsed.length} slash command(s)`)
 
     // Add event listeners
     this.client.on('ready', client => {
-      console.log(`Logged in as ${client.user.tag}`)
+      this.logger.info(`Logged in as ${client.user.tag}`)
     })
 
     this.client.on('interactionCreate', async interaction => {
