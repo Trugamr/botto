@@ -1,4 +1,8 @@
-import { Interaction, SlashCommandBuilder } from 'discord.js'
+import {
+  ChatInputCommandInteraction,
+  Interaction,
+  SlashCommandBuilder,
+} from 'discord.js'
 import { injectable } from 'inversify'
 import Command from '../command.js'
 
@@ -8,9 +12,7 @@ export default class Ping implements Command {
     .setName('ping')
     .setDescription('responds with pong')
 
-  readonly handle = async (interaction: Interaction) => {
-    if (interaction.isChatInputCommand()) {
-      await interaction.reply('pong')
-    }
+  readonly handle = async (interaction: ChatInputCommandInteraction) => {
+    await interaction.reply('pong')
   }
 }

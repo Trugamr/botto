@@ -39,7 +39,7 @@ export default class Bot {
     this.logger.info(`Registered ${parsed.length} slash command(s)`)
 
     // Add event listeners
-    this.client.on(Events.ClientReady, client => {
+    this.client.once(Events.ClientReady, client => {
       this.logger.info(`Logged in as ${client.user.tag}`)
     })
 
@@ -50,7 +50,7 @@ export default class Bot {
           // TODO: Send error message instead
           return
         }
-        command.handle(interaction)
+        await command.handle(interaction)
       }
     })
 
