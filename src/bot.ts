@@ -1,4 +1,4 @@
-import { Client, ClientEvents, Collection, REST, Routes } from 'discord.js'
+import { Client, Collection, REST, Routes } from 'discord.js'
 import { inject, injectable, multiInject } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
@@ -17,7 +17,7 @@ export default class Bot {
     @inject(TYPES.Config) private readonly config: Config,
     @inject(TYPES.Client) private readonly client: Client,
     @inject(TYPES.Rest) private readonly rest: REST,
-    @multiInject(TYPES.Event) private readonly events: Event<keyof ClientEvents>[],
+    @multiInject(TYPES.Event) private readonly events: Event[],
     @multiInject(TYPES.Command) private readonly commands: Command[],
   ) {
     for (const command of this.commands) {
@@ -42,9 +42,9 @@ export default class Bot {
     // Add event listeners
     for (const event of this.events) {
       if (event.once) {
-        this.client.once(event.name, event.listener)
+        this.client.once(event.type, event.listener)
       } else {
-        this.client.on(event.name, event.listener)
+        this.client.on(event.type, event.listener)
       }
     }
 

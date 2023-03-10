@@ -8,7 +8,7 @@ import TYPES from '../types'
 @injectable()
 export default class InteractionCreate implements Event<Events.InteractionCreate> {
   private readonly commandsByName = new Collection<string, Command>()
-  readonly name = Events.InteractionCreate
+  readonly type = Events.InteractionCreate
   readonly once = false
 
   constructor(@multiInject(TYPES.Command) private readonly commands: Command[]) {

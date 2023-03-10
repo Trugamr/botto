@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Interaction, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { injectable } from 'inversify'
 import Command from '../command.js'
 

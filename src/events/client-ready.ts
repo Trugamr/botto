@@ -6,12 +6,12 @@ import TYPES from '../types'
 
 @injectable()
 export default class ClientReady implements Event<Events.ClientReady> {
-  readonly name = Events.ClientReady
+  readonly type = Events.ClientReady
   readonly once = true
 
   constructor(@inject(TYPES.Logger) private readonly logger: Logger) {}
 
-  readonly listener = (client: Client<true>) => {
+  readonly listener = async (client: Client<true>) => {
     this.logger.info(`Logged in as ${client.user.tag}`)
   }
 }
