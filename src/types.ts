@@ -4,6 +4,7 @@ const TYPES = {
   Rest: Symbol('Rest'),
   Client: Symbol('Client'),
   Bot: Symbol('Bot'),
+  Event: Symbol('Event'),
   Command: Symbol('Command'),
 }
 

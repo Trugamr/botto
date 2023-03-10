@@ -1,27 +1,28 @@
-import { Client, Collection, Events, REST, Routes } from 'discord.js'
-import { inject, injectable } from 'inversify'
+import { Client, ClientEvents, Collection, REST, Routes } from 'discord.js'
+import { inject, injectable, multiInject } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
 import Command from './command.js'
-import container from './container.js'
+import Event from './event.js'
 import Config from './services/config.js'
 import type { Logger } from './services/logger.js'
 import TYPES from './types.js'
 
 @injectable()
 export default class Bot {
-  private readonly commands = new Collection<string, Command>()
+  private readonly commandsByName = new Collection<string, Command>()
 
   constructor(
     @inject(TYPES.Logger) private readonly logger: Logger,
     @inject(TYPES.Config) private readonly config: Config,
     @inject(TYPES.Client) private readonly client: Client,
     @inject(TYPES.Rest) private readonly rest: REST,
+    @multiInject(TYPES.Event) private readonly events: Event<keyof ClientEvents>[],
+    @multiInject(TYPES.Command) private readonly commands: Command[],
   ) {
-    const commands = container.getAll<Command>(TYPES.Command)
-    for (const command of commands) {
+    for (const command of this.commands) {
       invariant(command.builder.name, 'commmand name is required')
-      this.commands.set(command.builder.name, command)
+      this.commandsByName.set(command.builder.name, command)
     }
   }
 
@@ -32,27 +33,20 @@ export default class Bot {
     const result = await this.rest.put(
       Routes.applicationCommands(this.config.get('DISCORD_CLIENT_ID')),
       {
-        body: this.commands.map(command => command.builder.toJSON()),
+        body: this.commandsByName.map(command => command.builder.toJSON()),
       },
     )
     const parsed = await z.array(z.unknown()).parseAsync(result)
     this.logger.info(`Registered ${parsed.length} slash command(s)`)
 
     // Add event listeners
-    this.client.once(Events.ClientReady, client => {
-      this.logger.info(`Logged in as ${client.user.tag}`)
-    })
-
-    this.client.on(Events.InteractionCreate, async interaction => {
-      if (interaction.isChatInputCommand()) {
-        const command = this.commands.get(interaction.commandName)
-        if (!command) {
-          // TODO: Send error message instead
-          return
-        }
-        await command.handle(interaction)
+    for (const event of this.events) {
+      if (event.once) {
+        this.client.once(event.name, event.listener)
+      } else {
+        this.client.on(event.name, event.listener)
       }
-    })
+    }
 
     // Connect and start listening for events
     await this.client.login(this.config.get('DISCORD_BOT_TOKEN'))

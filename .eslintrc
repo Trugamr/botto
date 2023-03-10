@@ -15,10 +15,7 @@
   "plugins": ["@typescript-eslint"],
   "rules": {
     "no-console": "warn",
-    "import/order": [
-      "error",
-      { "alphabetize": { "order": "asc", "caseInsensitive": true } }
-    ],
+    "import/order": ["error", { "alphabetize": { "order": "asc", "caseInsensitive": true } }],
     "import/consistent-type-specifier-style": ["error", "prefer-top-level"]
   },
   "root": true
