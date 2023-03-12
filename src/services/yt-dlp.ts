@@ -2,6 +2,19 @@ import { execa } from 'execa'
 import { injectable } from 'inversify'
 import { z } from 'zod'
 
+const YoutubeVideoSchema = z.object({
+  title: z.string(),
+  url: z.string().url(),
+  duration: z.number(),
+})
+
+const YoutubeVideoFormatSchema = z.object({
+  ext: z.string(),
+  audio_ext: z.preprocess(ext => (ext === 'none' ? undefined : ext), z.string().optional()),
+  quality: z.number().optional(),
+  url: z.string().url(),
+})
+
 @injectable()
 export class YtDlp {
   async version() {
@@ -20,11 +33,24 @@ export class YtDlp {
       playlist,
     ])
 
-    return stdout.split('\n').map(line => {
+    const lines = stdout.split('\n')
+    const links: z.infer<typeof YoutubeVideoSchema>[] = []
+
+    for (const line of lines) {
       const json = JSON.parse(line)
-      return z
-        .object({ title: z.string(), url: z.string().url(), duration: z.number() })
-        .parse(json)
-    })
+      const parsed = await YoutubeVideoSchema.parseAsync(json)
+      links.push(parsed)
+    }
+
+    return links
+  }
+
+  /**
+   * Get available formats from youtube video link
+   */
+  async getVideoInfo(url: string) {
+    const { stdout } = await execa('yt-dlp', ['-j', '--no-warnings', url])
+    const json = JSON.parse(stdout)
+    return z.object({ formats: z.array(YoutubeVideoFormatSchema) }).parseAsync(json)
   }
 }
