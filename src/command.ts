@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 
 export default interface Command {
-  readonly builder: SlashCommandBuilder
-  readonly handle: (interaction: ChatInputCommandInteraction) => Promise<void>
+  readonly builder: Pick<SlashCommandBuilder, 'name' | 'toJSON'>
+  handle(interaction: ChatInputCommandInteraction): Promise<void>
 }

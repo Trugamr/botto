@@ -6,6 +6,8 @@ const TYPES = {
   Bot: Symbol('Bot'),
   Event: Symbol('Event'),
   Command: Symbol('Command'),
+  YtDlp: Symbol('YtDlp'),
+  Youtube: Symbol('Youtube'),
 }
 
 export default TYPES

@@ -3,11 +3,14 @@ import { Container } from 'inversify'
 import Bot from './bot.js'
 import Command from './command.js'
 import Ping from './commands/ping.js'
+import Play from './commands/play.js'
 import Event from './event.js'
 import ClientReady from './events/client-ready.js'
 import InteractionCreate from './events/interaction-create.js'
 import Config from './services/config.js'
 import { Logger, logger } from './services/logger.js'
+import { Youtube } from './services/youtube.js'
+import { YtDlp } from './services/yt-dlp.js'
 import TYPES from './types.js'
 
 const intents = [GatewayIntentBits.Guilds]
@@ -28,6 +31,10 @@ container
 container.bind<Client>(TYPES.Client).toConstantValue(new Client({ intents }))
 container.bind<Bot>(TYPES.Bot).to(Bot).inSingletonScope()
 
+// Services
+container.bind<YtDlp>(TYPES.YtDlp).to(YtDlp).inSingletonScope()
+container.bind<Youtube>(TYPES.Youtube).to(Youtube).inSingletonScope()
+
 // Events
 container.bind<Event<Events.ClientReady>>(TYPES.Event).to(ClientReady).inSingletonScope()
 container
@@ -36,7 +43,7 @@ container
   .inSingletonScope()
 
 // Commands
-const commands = [Ping]
+const commands = [Ping, Play]
 for (const command of commands) {
   container.bind<Command>(TYPES.Command).to(command).inSingletonScope()
 }

@@ -6,9 +6,9 @@ import Command from '../command.js'
 export default class Ping implements Command {
   readonly builder = new SlashCommandBuilder()
     .setName('ping')
-    .setDescription('responds with pong')
+    .setDescription('Responds with pong')
 
-  readonly handle = async (interaction: ChatInputCommandInteraction) => {
+  async handle(interaction: ChatInputCommandInteraction) {
     await interaction.reply('pong')
   }
 }
