@@ -8,6 +8,7 @@ const TYPES = {
   Command: Symbol('Command'),
   YtDlp: Symbol('YtDlp'),
   Youtube: Symbol('Youtube'),
+  Voice: Symbol('Voice'),
 }
 
 export default TYPES

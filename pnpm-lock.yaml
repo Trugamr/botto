@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@discordjs/voice': ^0.15.0
   '@types/node': ^18.14.6
   '@typescript-eslint/eslint-plugin': ^5.54.1
   '@typescript-eslint/parser': ^5.54.1
@@ -11,6 +12,7 @@ specifiers:
   eslint-plugin-import: ^2.27.5
   execa: ^7.1.0
   inversify: ^6.0.1
+  libsodium-wrappers: ^0.7.11
   nodemon: ^2.0.21
   npm-run-all: ^4.1.5
   prettier: ^2.8.4
@@ -23,10 +25,12 @@ specifiers:
   zod: ^3.21.4
 
 dependencies:
+  '@discordjs/voice': 0.15.0
   discord.js: 14.7.1
   dotenv: 16.0.3
   execa: 7.1.0
   inversify: 6.0.1
+  libsodium-wrappers: 0.7.11
   npm-run-all: 4.1.5
   reflect-metadata: 0.1.13
   tiny-invariant: 1.3.1
@@ -102,6 +106,24 @@ packages:
   /@discordjs/util/0.1.0:
     resolution: {integrity: sha512-e7d+PaTLVQav6rOc2tojh2y6FE8S7REkqLldq1XF4soCx74XB/DIjbVbVLtBemf0nLW77ntz0v+o5DytKwFNLQ==}
     engines: {node: '>=16.9.0'}
+    dev: false
+
+  /@discordjs/voice/0.15.0:
+    resolution: {integrity: sha512-YEvrRchDhjB0QbI9QYOF/qgDwvGb9sNGUyks5d3Srl+VRoMoKkMzWY+wcEfVbAgdMIAdLi5vyrTKP/gLND26jA==}
+    engines: {node: '>=16.9.0'}
+    dependencies:
+      '@types/ws': 8.5.4
+      discord-api-types: 0.37.35
+      prism-media: 1.3.5
+      tslib: 2.5.0
+      ws: 8.12.1
+    transitivePeerDependencies:
+      - '@discordjs/opus'
+      - bufferutil
+      - ffmpeg-static
+      - node-opus
+      - opusscript
+      - utf-8-validate
     dev: false
 
   /@eslint/eslintrc/2.0.0:
@@ -1576,6 +1598,16 @@ packages:
       type-check: 0.4.0
     dev: true
 
+  /libsodium-wrappers/0.7.11:
+    resolution: {integrity: sha512-SrcLtXj7BM19vUKtQuyQKiQCRJPgbpauzl3s0rSwD+60wtHqSUuqcoawlMDheCJga85nKOQwxNYQxf/CKAvs6Q==}
+    dependencies:
+      libsodium: 0.7.11
+    dev: false
+
+  /libsodium/0.7.11:
+    resolution: {integrity: sha512-WPfJ7sS53I2s4iM58QxY3Inb83/6mjlYgcmZs7DJsvDlnmVUwNinBCi5vBT43P6bHRy01O4zsMU2CoVR6xJ40A==}
+    dev: false
+
   /load-json-file/4.0.0:
     resolution: {integrity: sha512-Kx8hMakjX03tiGTLAIdJ+lL0htKnXjEZN6hk/tozf/WOuYGdZBJrZ+rCJRbVCugsjB3jMLn9746NsQIf5VjBMw==}
     engines: {node: '>=4'}
@@ -1936,6 +1968,24 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: true
+
+  /prism-media/1.3.5:
+    resolution: {integrity: sha512-IQdl0Q01m4LrkN1EGIE9lphov5Hy7WWlH6ulf5QdGePLlPas9p2mhgddTEHrlaXYjjFToM1/rWuwF37VF4taaA==}
+    peerDependencies:
+      '@discordjs/opus': '>=0.8.0 <1.0.0'
+      ffmpeg-static: ^5.0.2 || ^4.2.7 || ^3.0.0 || ^2.4.0
+      node-opus: ^0.3.3
+      opusscript: ^0.0.8
+    peerDependenciesMeta:
+      '@discordjs/opus':
+        optional: true
+      ffmpeg-static:
+        optional: true
+      node-opus:
+        optional: true
+      opusscript:
+        optional: true
+    dev: false
 
   /pstree.remy/1.1.8:
     resolution: {integrity: sha512-77DZwxQmxKnu3aR542U+X8FypNzbfJ+C5XQDk3uWjWxn6151aIMGthWYRXTqT1E5oJvg+ljaa2OJi+VfvCOQ8w==}

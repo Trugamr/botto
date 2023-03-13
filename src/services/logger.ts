@@ -12,4 +12,5 @@ const format = winston.format.combine(
 
 const transports = [new winston.transports.Console()]
 
-export const logger = winston.createLogger({ format, transports })
+// TODO: Add option to change log level
+export const logger = winston.createLogger({ level: 'debug', format, transports })
