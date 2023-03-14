@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, REST } from 'discord.js'
+import { Client, Events, GatewayIntentBits, Guild, REST } from 'discord.js'
 import { Container } from 'inversify'
 import Bot from './bot.js'
 import Command from './command.js'
@@ -8,8 +8,10 @@ import Play from './commands/play.js'
 import Event from './event.js'
 import ClientReady from './events/client-ready.js'
 import InteractionCreate from './events/interaction-create.js'
+import Players from './managers/players.js'
 import Config from './services/config.js'
 import { Logger, logger } from './services/logger.js'
+import Player, { PlayerFactory } from './services/player.js'
 import { Voice } from './services/voice.js'
 import { Youtube } from './services/youtube.js'
 import { YtDlp } from './services/yt-dlp.js'
@@ -37,6 +39,18 @@ container.bind<Bot>(TYPES.Bot).to(Bot).inSingletonScope()
 container.bind<YtDlp>(TYPES.YtDlp).to(YtDlp).inSingletonScope()
 container.bind<Youtube>(TYPES.Youtube).to(Youtube).inSingletonScope()
 container.bind<Voice>(TYPES.Voice).to(Voice).inSingletonScope()
+
+container.bind<Player>(TYPES.Player).toConstructor(Player)
+container.bind<PlayerFactory>(TYPES.PlayerFactory).toFactory(context => {
+  return (guildId: Guild['id']) => {
+    const logger = context.container.get<Logger>(TYPES.Logger)
+    const voice = context.container.get<Voice>(TYPES.Voice)
+    return new Player(guildId, logger, voice)
+  }
+})
+
+// Managers
+container.bind<Players>(TYPES.Players).to(Players).inSingletonScope()
 
 // Events
 container.bind<Event<Events.ClientReady>>(TYPES.Event).to(ClientReady).inSingletonScope()

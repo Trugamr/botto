@@ -1,15 +1,10 @@
-import {
-  AudioPlayerStatus,
-  StreamType,
-  createAudioPlayer,
-  createAudioResource,
-  entersState,
-} from '@discordjs/voice'
+import { createAudioResource } from '@discordjs/voice'
 import { ChannelType, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
 import Command from '../command.js'
+import Players from '../managers/players.js'
 import { Logger } from '../services/logger.js'
 import { Voice } from '../services/voice.js'
 import { Youtube } from '../services/youtube.js'
@@ -17,10 +12,6 @@ import { YtDlp } from '../services/yt-dlp.js'
 import TYPES from '../types.js'
 
 // TODO: Fix audio stops playing after couple of minutes
-// See: https://github.com/discordjs/discord.js/issues/9185#issuecomment-1450863604
-
-// TODO: Create a player that manages queue and fetch stream urls when required
-const player = createAudioPlayer({ debug: true })
 
 @injectable()
 export default class Play implements Command {
@@ -29,6 +20,7 @@ export default class Play implements Command {
     @inject(TYPES.YtDlp) private readonly ytDlp: YtDlp,
     @inject(TYPES.Youtube) private readonly youtube: Youtube,
     @inject(TYPES.Voice) private readonly voice: Voice,
+    @inject(TYPES.Players) private readonly players: Players,
   ) {}
 
   readonly builder = new SlashCommandBuilder()
@@ -87,19 +79,18 @@ export default class Play implements Command {
       return
     }
 
-    await interaction.editReply(`Debug: \`\`\`json\n${JSON.stringify(audio, null, 2)}\n\`\`\``)
-
     // Join voice channel
-    const connection = await this.voice.join(channel)
-    // Bind player to voice channel connection
-    connection.subscribe(player)
+    await this.voice.join(channel)
 
-    const resource = createAudioResource(audio.url, { inputType: StreamType.Arbitrary })
+    // Get player
+    invariant(interaction.guild, 'guild info should pe present on interaction')
+    const player = this.players.get(interaction.guild.id)
 
-    player.play(resource)
+    // Create resource and play
+    const resource = createAudioResource(audio.url)
 
-    // Wait for state of player to update from "buffering" to "playing"
-    await entersState(player, AudioPlayerStatus.Playing, 5_000)
+    await player.play(resource)
+
     await interaction.editReply('Playing')
   }
 }

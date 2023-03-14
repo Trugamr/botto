@@ -9,6 +9,9 @@ const TYPES = {
   YtDlp: Symbol('YtDlp'),
   Youtube: Symbol('Youtube'),
   Voice: Symbol('Voice'),
+  Player: Symbol('Player'),
+  PlayerFactory: Symbol('PlayerFactory'),
+  Players: Symbol('Players'),
 }
 
 export default TYPES

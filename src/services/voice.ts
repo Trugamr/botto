@@ -28,6 +28,7 @@ export class Voice {
 
     if (!connection) {
       connection = joinVoiceChannel({
+        debug: true,
         channelId: channel.id,
         guildId: channel.guild.id,
         adapterCreator: channel.guild.voiceAdapterCreator,
@@ -37,6 +38,10 @@ export class Voice {
     // TODO: Cleanup
     connection.on('stateChange', (prev, next) => {
       this.logger.debug(`Connection state update ${prev.status} -> ${next.status}`)
+    })
+
+    connection.on('debug', message => {
+      this.logger.debug(`Connection: ${message}`)
     })
 
     // TODO: Send error messsage if fails
