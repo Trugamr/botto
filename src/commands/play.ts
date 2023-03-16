@@ -1,5 +1,6 @@
-import { createAudioResource } from '@discordjs/voice'
+import { StreamType, createAudioResource } from '@discordjs/voice'
 import { ChannelType, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { execa } from 'execa'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
@@ -70,11 +71,11 @@ export default class Play implements Command {
 
     // TODO: Get best suited audio format instead of higest quality one
     // Get highest quality audio stream url
-    const { formats } = await this.ytDlp.getVideoInfo(url)
-    const [audio] = formats
-      .filter(f => f.audio_ext)
+    const { duration, formats } = await this.ytDlp.getVideoInfo(url)
+    const [format] = formats
+      .filter(f => f.acodec === 'opus' && f.audio_ext === 'webm')
       .sort((prev, next) => (prev.quality ?? 0) - (next.quality ?? 0))
-    if (!audio) {
+    if (!format) {
       await interaction.editReply('Failed to find playable audio stream for specified query')
       return
     }
@@ -86,8 +87,27 @@ export default class Play implements Command {
     invariant(interaction.guild, 'guild info should pe present on interaction')
     const player = this.players.get(interaction.guild.id)
 
+    // Create ffmpeg stream
+    // prettier-ignore
+    const { stdout: stream, stderr } = execa('ffmpeg', [
+      '-reconnect', '1', // Reconnect on tls connection errors
+      '-reconnect_streamed', '1', // Reconnect to input stream
+      '-reconnect_delay_max', '3', // Reconnect max timeout 
+      '-to', duration.toString(), // Set duration for stream
+      '-i', format.url, // Input audio url
+      '-c:a', 'libopus', // Set audio codec
+      '-vn', // Disable video processing
+      '-f', 'webm', // Set format
+      '-', // Pipe output to stdout
+    ])
+    invariant(stream, 'ffmpeg stream should not be null')
+    invariant(stderr, 'ffmpeg stderr should not be null')
+    stderr.pipe(process.stderr)
+
     // Create resource and play
-    const resource = createAudioResource(audio.url)
+    const resource = createAudioResource(stream, {
+      inputType: StreamType.WebmOpus,
+    })
 
     await player.play(resource)
 

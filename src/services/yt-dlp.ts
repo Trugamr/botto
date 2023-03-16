@@ -2,6 +2,8 @@ import { execa } from 'execa'
 import { injectable } from 'inversify'
 import { z } from 'zod'
 
+// TODO: Fix types and schemas
+
 const YoutubeVideoSchema = z.object({
   title: z.string(),
   url: z.string().url(),
@@ -10,6 +12,7 @@ const YoutubeVideoSchema = z.object({
 
 const YoutubeVideoFormatSchema = z.object({
   ext: z.string(),
+  acodec: z.string().optional(),
   audio_ext: z.preprocess(ext => (ext === 'none' ? undefined : ext), z.string().optional()),
   quality: z.number().optional(),
   url: z.string().url(),
@@ -51,6 +54,8 @@ export class YtDlp {
   async getVideoInfo(url: string) {
     const { stdout } = await execa('yt-dlp', ['-j', '--no-warnings', url])
     const json = JSON.parse(stdout)
-    return z.object({ formats: z.array(YoutubeVideoFormatSchema) }).parseAsync(json)
+    return z
+      .object({ duration: z.number(), formats: z.array(YoutubeVideoFormatSchema) })
+      .parseAsync(json)
   }
 }
