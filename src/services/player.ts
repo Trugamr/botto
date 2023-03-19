@@ -13,18 +13,38 @@ export default class Player {
   private _subscription: PlayerSubscription | undefined
 
   constructor(
-    private readonly connection: VoiceConnection,
+    readonly connection: VoiceConnection,
     @inject(TYPES.Logger) private readonly logger: Logger,
   ) {}
 
+  private create(connection: VoiceConnection) {
+    const player = createAudioPlayer()
+    const subscription = connection.subscribe(player)
+    invariant(subscription, 'subscription should not be undefined')
+    return subscription
+  }
+
+  /**
+   * Attach player to new connection if required
+   */
+  attach(connection: VoiceConnection) {
+    // Create new subscription if one doesn't exist
+    if (!this._subscription) {
+      this._subscription = this.create(connection)
+      return
+    }
+    // If connection is not same then re-attach
+    if (this._subscription.connection !== connection) {
+      this._subscription.player.stop()
+      this._subscription.connection.destroy()
+      this._subscription.unsubscribe()
+      this._subscription = this.create(connection)
+    }
+  }
+
   private get subscription() {
     if (!this._subscription) {
-      // Create player
-      const player = createAudioPlayer()
-      // Create subscription
-      const subscription = this.connection.subscribe(player)
-      invariant(subscription, 'subscription should not be undefined')
-      this._subscription = subscription
+      this._subscription = this.create(this.connection)
     }
     return this._subscription
   }

@@ -19,9 +19,11 @@ export default class Players {
       const player = new Player(connection, logger)
       this.players.set(id, player)
     }
-    // Find and return existing player for guild
+    // If player exists but the connection is different
     const player = this.players.get(id)
     invariant(player, 'player should exist for guild')
+    // Attach player to connection if it's new
+    player.attach(connection)
     return player
   }
 }

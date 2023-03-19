@@ -1,4 +1,4 @@
-import { Collection, Events, Interaction, InteractionType } from 'discord.js'
+import { Collection, Events, Interaction } from 'discord.js'
 import { injectable, multiInject } from 'inversify'
 import invariant from 'tiny-invariant'
 import Command from '../command'

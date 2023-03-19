@@ -5,6 +5,7 @@ import Command from './command.js'
 import { Disconnect } from './commands/disconnect.js'
 import Ping from './commands/ping.js'
 import Play from './commands/play.js'
+import Stop from './commands/stop.js'
 import Event from './event.js'
 import ClientReady from './events/client-ready.js'
 import InteractionCreate from './events/interaction-create.js'
@@ -50,7 +51,7 @@ container
   .inSingletonScope()
 
 // Commands
-const commands = [Ping, Play, Disconnect]
+const commands = [Ping, Play, Disconnect, Stop]
 for (const command of commands) {
   container.bind<Command>(TYPES.Command).to(command).inSingletonScope()
 }
