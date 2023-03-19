@@ -4,36 +4,36 @@ import { execa } from 'execa'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
-import Command from '../command.js'
+import Command, { Feature } from '../command.js'
 import Players from '../managers/players.js'
-import { Logger } from '../services/logger.js'
 import { Voice } from '../services/voice.js'
 import { Youtube } from '../services/youtube.js'
 import { YtDlp } from '../services/yt-dlp.js'
 import TYPES from '../types.js'
 
-// TODO: Fix audio stops playing after couple of minutes
+// TODO: Handling stream errors gracefully
 
 @injectable()
 export default class Play implements Command {
-  constructor(
-    @inject(TYPES.Logger) private readonly logger: Logger,
-    @inject(TYPES.YtDlp) private readonly ytDlp: YtDlp,
-    @inject(TYPES.Youtube) private readonly youtube: Youtube,
-    @inject(TYPES.Voice) private readonly voice: Voice,
-    @inject(TYPES.Players) private readonly players: Players,
-  ) {}
-
   readonly builder = new SlashCommandBuilder()
     .setName('play')
     .setDescription('Search or play music using a link')
     .addStringOption(option =>
       option.setName('query').setDescription('Youtube video url').setRequired(true),
     )
+  readonly features = [Feature.Voice]
+
+  constructor(
+    @inject(TYPES.YtDlp) private readonly ytDlp: YtDlp,
+    @inject(TYPES.Youtube) private readonly youtube: Youtube,
+    @inject(TYPES.Voice) private readonly voice: Voice,
+    @inject(TYPES.Players) private readonly players: Players,
+  ) {}
 
   async handle(interaction: ChatInputCommandInteraction) {
+    invariant(interaction.guild, 'play interaction must have guild')
     // Check if user is currently in a voice channel
-    const channel = interaction.guild?.channels.cache.find(channel => {
+    const channel = interaction.guild.channels.cache.find(channel => {
       if (channel.type === ChannelType.GuildVoice) {
         return channel.members.find(member => member.id === interaction.user.id)
       }
@@ -81,31 +81,34 @@ export default class Play implements Command {
     }
 
     // Join voice channel
-    await this.voice.join(channel)
+    let connection = this.voice.get(interaction.guild.id)
+    if (!connection) {
+      connection = this.voice.join(channel)
+    }
 
     // Get player
     invariant(interaction.guild, 'guild info should pe present on interaction')
-    const player = this.players.get(interaction.guild.id)
+    const player = this.players.get(connection)
 
     // Create ffmpeg stream
     // prettier-ignore
-    const { stdout: stream, stderr } = execa('ffmpeg', [
+    const ffmpeg = execa('ffmpeg', [
       '-reconnect', '1', // Reconnect on tls connection errors
       '-reconnect_streamed', '1', // Reconnect to input stream
       '-reconnect_delay_max', '3', // Reconnect max timeout 
+      '-ss', "0", // Set duration for stream
       '-to', duration.toString(), // Set duration for stream
       '-i', format.url, // Input audio url
+      // TODO: Use copy when stream is already opus encoded
       '-c:a', 'libopus', // Set audio codec
       '-vn', // Disable video processing
       '-f', 'webm', // Set format
       '-', // Pipe output to stdout
     ])
-    invariant(stream, 'ffmpeg stream should not be null')
-    invariant(stderr, 'ffmpeg stderr should not be null')
-    stderr.pipe(process.stderr)
+    invariant(ffmpeg.stdout, 'ffmpeg stream should not be null')
 
     // Create resource and play
-    const resource = createAudioResource(stream, {
+    const resource = createAudioResource(ffmpeg.stdout, {
       inputType: StreamType.WebmOpus,
     })
 

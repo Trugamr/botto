@@ -1,4 +1,4 @@
-import { Collection, Events, Interaction } from 'discord.js'
+import { Collection, Events, Interaction, InteractionType } from 'discord.js'
 import { injectable, multiInject } from 'inversify'
 import invariant from 'tiny-invariant'
 import Command from '../command'
@@ -19,7 +19,7 @@ export default class InteractionCreate implements Event<Events.InteractionCreate
   }
 
   readonly listener = async (interaction: Interaction) => {
-    if (interaction.isChatInputCommand()) {
+    if (interaction.isCommand()) {
       const command = this.commandsByName.get(interaction.commandName)
       if (!command) {
         // TODO: Send error message instead

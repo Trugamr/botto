@@ -1,6 +1,12 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
+
+export enum Feature {
+  Voice,
+}
 
 export default interface Command {
   readonly builder: Pick<SlashCommandBuilder, 'name' | 'toJSON'>
-  handle(interaction: ChatInputCommandInteraction): Promise<void>
+  readonly features: Feature[]
+
+  handle(interaction: CommandInteraction): Promise<void>
 }
