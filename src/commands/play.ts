@@ -1,5 +1,5 @@
 import { StreamType, createAudioResource } from '@discordjs/voice'
-import { ChannelType, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { execa } from 'execa'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
@@ -32,18 +32,6 @@ export default class Play implements Command {
 
   async handle(interaction: ChatInputCommandInteraction) {
     invariant(interaction.guild, 'play interaction must have guild')
-    // Check if user is currently in a voice channel
-    const channel = interaction.guild.channels.cache.find(channel => {
-      if (channel.type === ChannelType.GuildVoice) {
-        return channel.members.find(member => member.id === interaction.user.id)
-      }
-      return false
-    })
-    if (!channel) {
-      await interaction.editReply('You must be in voice channel')
-      return
-    }
-    invariant(channel.type === ChannelType.GuildVoice, 'channel must be voice channel')
 
     const query = interaction.options.getString('query', true)
     const result = await z.string().url().safeParseAsync(query)
@@ -80,11 +68,9 @@ export default class Play implements Command {
       return
     }
 
-    // Join voice channel
-    let connection = this.voice.get(interaction.guild.id)
-    if (!connection) {
-      connection = this.voice.join(channel)
-    }
+    // Get connection
+    const connection = this.voice.get(interaction.guild.id)
+    invariant(connection, 'voice connectino should not be undefined')
 
     // Get player
     invariant(interaction.guild, 'guild info should pe present on interaction')

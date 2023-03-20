@@ -4,6 +4,8 @@ export enum Feature {
   Voice,
 }
 
+// TODO: Add required permissions
+
 export default interface Command {
   readonly builder: Pick<SlashCommandBuilder, 'name' | 'toJSON'>
   readonly features: Feature[]
