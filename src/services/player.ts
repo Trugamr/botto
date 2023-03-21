@@ -24,6 +24,13 @@ export default class Player {
     return subscription
   }
 
+  get status() {
+    if (this._subscription) {
+      return this._subscription.player.state.status
+    }
+    return null
+  }
+
   /**
    * Attach player to new connection if required
    */
@@ -72,5 +79,19 @@ export default class Player {
       return
     }
     this._subscription.player.stop()
+  }
+
+  pause() {
+    if (!this._subscription) {
+      return
+    }
+    this._subscription.player.pause()
+  }
+
+  resume() {
+    if (!this._subscription) {
+      return
+    }
+    this._subscription.player.unpause()
   }
 }

@@ -1,14 +1,17 @@
+import { AudioPlayerStatus } from '@discordjs/voice'
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
-import Command from '../command.js'
-import Players from '../managers/players.js'
-import { Voice } from '../services/voice.js'
-import TYPES from '../types.js'
+import Command from '../command'
+import Players from '../managers/players'
+import { Voice } from '../services/voice'
+import TYPES from '../types'
 
 @injectable()
-export default class Stop implements Command {
-  readonly builder = new SlashCommandBuilder().setName('stop').setDescription('Stop playback')
+export default class Resume implements Command {
+  readonly builder = new SlashCommandBuilder()
+    .setName('resume')
+    .setDescription('Resume playback')
   readonly features = []
 
   constructor(
@@ -27,9 +30,13 @@ export default class Stop implements Command {
     }
 
     const player = this.players.get(connection)
-    player.stop()
+    if (player.status !== AudioPlayerStatus.Paused) {
+      await interaction.reply('Nothing to resume')
+      return
+    }
+    player.resume()
 
-    // TODO: Ensure player stop state?
-    await interaction.reply('Playback stoppped')
+    // TODO: Ensure player resumed state?
+    await interaction.reply('Playback resumed')
   }
 }
