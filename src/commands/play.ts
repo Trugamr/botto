@@ -6,9 +6,9 @@ import invariant from 'tiny-invariant'
 import { z } from 'zod'
 import Command, { Feature } from '../command.js'
 import Players from '../managers/players.js'
+import { Logger } from '../services/logger.js'
 import { Voice } from '../services/voice.js'
-import { Youtube } from '../services/youtube.js'
-import { YtDlp } from '../services/yt-dlp.js'
+import { MediaInfo, YtDlp } from '../services/yt-dlp.js'
 import TYPES from '../types.js'
 
 // TODO: Handling stream errors gracefully
@@ -25,9 +25,9 @@ export default class Play implements Command {
 
   constructor(
     @inject(TYPES.YtDlp) private readonly ytDlp: YtDlp,
-    @inject(TYPES.Youtube) private readonly youtube: Youtube,
     @inject(TYPES.Voice) private readonly voice: Voice,
     @inject(TYPES.Players) private readonly players: Players,
+    @inject(TYPES.Logger) private readonly logger: Logger,
   ) {}
 
   async handle(interaction: ChatInputCommandInteraction) {
@@ -42,28 +42,15 @@ export default class Play implements Command {
       })
       return
     }
-
-    // It's a valid url we can continue
-    const { type, url } = this.youtube.parse(result.data)
-    if (type === 'playlist') {
-      // TODO: Handle playlist urls
-      await interaction.reply({
-        content: 'Youtube playlists are not supported yet',
-        ephemeral: true,
-      })
-      return
-    }
+    const url = result.data
 
     // Tasks after this can take more than 3 seconds to complete
     await interaction.deferReply({ ephemeral: true })
 
-    // TODO: Get best suited audio format instead of higest quality one
-    // Get highest quality audio stream url
-    const { duration, formats } = await this.ytDlp.getVideoInfo(url)
-    const [format] = formats
-      .filter(f => f.acodec === 'opus' && f.audio_ext === 'webm')
-      .sort((prev, next) => (prev.quality ?? 0) - (next.quality ?? 0))
-    if (!format) {
+    let info: MediaInfo | undefined = undefined
+    try {
+      info = await this.ytDlp.getMediaInfo(url)
+    } catch (error) {
       await interaction.editReply('Failed to find playable audio stream for specified query')
       return
     }
@@ -76,6 +63,9 @@ export default class Play implements Command {
     invariant(interaction.guild, 'guild info should pe present on interaction')
     const player = this.players.get(connection)
 
+    // Prevent rencode if it's already opus encoded stream
+    // TODO: Check returned responses for popular services
+    const codec = [info.acodec, info.audio_ext].includes('opus') ? 'copy' : 'libopus'
     // Create ffmpeg stream
     // prettier-ignore
     const ffmpeg = execa('ffmpeg', [
@@ -83,15 +73,16 @@ export default class Play implements Command {
       '-reconnect_streamed', '1', // Reconnect to input stream
       '-reconnect_delay_max', '3', // Reconnect max timeout 
       '-ss', "0", // Set duration for stream
-      '-to', duration.toString(), // Set duration for stream
-      '-i', format.url, // Input audio url
-      // TODO: Use copy when stream is already opus encoded
-      '-c:a', 'libopus', // Set audio codec
+      '-to', info.duration.toString(), // Set duration for stream
+      '-i', info.url, // Input audio url
+      '-c:a', codec, // Set audio codec
       '-vn', // Disable video processing
       '-f', 'webm', // Set format
       '-', // Pipe output to stdout
     ])
-    invariant(ffmpeg.stdout, 'ffmpeg stream should not be null')
+    invariant(ffmpeg.stdout, 'ffmpeg stdout should not be undefined')
+
+    // TODO: Send error if stream could not start successfully
 
     // Create resource and play
     const resource = createAudioResource(ffmpeg.stdout, {
