@@ -1,7 +1,7 @@
 import { Client, Events } from 'discord.js'
 import { inject, injectable } from 'inversify'
-import Event from '../event'
 import { Logger } from '../services/logger'
+import Event from '../structs/event'
 import TYPES from '../types'
 
 @injectable()

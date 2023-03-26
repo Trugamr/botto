@@ -4,11 +4,11 @@ import { execa } from 'execa'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
-import Command, { Feature } from '../command.js'
 import Players from '../managers/players.js'
 import { Logger } from '../services/logger.js'
 import { Voice } from '../services/voice.js'
 import { MediaInfo, YtDlp } from '../services/yt-dlp.js'
+import Command, { Feature } from '../structs/command.js'
 import TYPES from '../types.js'
 
 // TODO: Handling stream errors gracefully
@@ -89,7 +89,7 @@ export default class Play implements Command {
       inputType: StreamType.WebmOpus,
     })
 
-    await player.play(resource)
+    player.play(resource)
 
     await interaction.editReply('Playing')
   }

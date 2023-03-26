@@ -1,9 +1,9 @@
 import { ChannelType, Collection, Events, Interaction } from 'discord.js'
 import { inject, injectable, multiInject } from 'inversify'
 import invariant from 'tiny-invariant'
-import Command, { Feature } from '../command'
-import Event from '../event'
 import { Voice } from '../services/voice'
+import Command, { Feature } from '../structs/command'
+import Event from '../structs/event'
 import TYPES from '../types'
 
 @injectable()

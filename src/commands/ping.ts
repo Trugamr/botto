@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { injectable } from 'inversify'
-import Command from '../command.js'
+import Command from '../structs/command.js'
 
 @injectable()
 export default class Ping implements Command {

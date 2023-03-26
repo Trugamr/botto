@@ -2,10 +2,10 @@ import { Client, Collection, REST, Routes } from 'discord.js'
 import { inject, injectable, multiInject } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
-import Command from './command.js'
-import Event from './event.js'
 import Config from './services/config.js'
 import type { Logger } from './services/logger.js'
+import Command from './structs/command.js'
+import Event from './structs/event.js'
 import TYPES from './types.js'
 
 @injectable()

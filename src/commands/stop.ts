@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
-import Command from '../command.js'
 import Players from '../managers/players.js'
 import { Voice } from '../services/voice.js'
+import Command from '../structs/command.js'
 import TYPES from '../types.js'
 
 @injectable()

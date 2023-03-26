@@ -2,9 +2,9 @@ import { AudioPlayerStatus } from '@discordjs/voice'
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
-import Command from '../command'
 import Players from '../managers/players'
 import { Voice } from '../services/voice'
+import Command from '../structs/command'
 import TYPES from '../types'
 
 @injectable()

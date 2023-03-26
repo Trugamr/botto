@@ -1,4 +1,6 @@
 import {
+  AudioPlayer,
+  AudioPlayerStatus,
   AudioResource,
   PlayerSubscription,
   VoiceConnection,
@@ -19,9 +21,23 @@ export default class Player {
 
   private create(connection: VoiceConnection) {
     const player = createAudioPlayer()
+    this.setup(player)
+
     const subscription = connection.subscribe(player)
     invariant(subscription, 'subscription should not be undefined')
     return subscription
+  }
+
+  /**
+   * Setup event listeners on player
+   */
+  private setup(player: AudioPlayer) {
+    player.on('stateChange', (prev, current) => {
+      if (current.status === AudioPlayerStatus.Idle) {
+        // TODO: Play next song
+      }
+      this.logger.info(`Player state changed: ${prev.status} -> ${current.status}`)
+    })
   }
 
   get status() {
@@ -56,10 +72,15 @@ export default class Player {
     return this._subscription
   }
 
+  enqueue(url: string) {
+    // TODO: Check if url is live stream, playlist or single plaayable media
+    throw new Error('Not implemented')
+  }
+
   /**
    * Play audio resource
    */
-  async play(resource: AudioResource) {
+  play(resource: AudioResource) {
     // Send resource to player to play
     this.subscription.player.play(resource)
   }
