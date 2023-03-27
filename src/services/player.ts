@@ -32,7 +32,12 @@ export default class Player {
   ) {}
 
   private create(connection: VoiceConnection) {
-    const player = createAudioPlayer()
+    const player = createAudioPlayer({
+      behaviors: {
+        // Helps with frame drops in live streams
+        maxMissedFrames: 50,
+      },
+    })
     this.setup(player)
 
     const subscription = connection.subscribe(player)
@@ -126,7 +131,6 @@ export default class Player {
     // Get info about media
     const info = await this.ytDlp.getMediaInfo(playable.url)
     invariant(info._type === 'video', 'only video link can be played')
-    invariant(info.duration, 'duration should not be undefined')
 
     // Create audio stream from url
     // Prevent re-encode if it's already opus encoded stream
@@ -134,18 +138,24 @@ export default class Player {
     const codec = [info.acodec, info.audio_ext].includes('opus') ? 'copy' : 'libopus'
     // Create ffmpeg stream
     // prettier-ignore
-    const ffmpeg = execa('ffmpeg', [
+    const options = [
       '-reconnect', '1', // Reconnect on tls connection errors
       '-reconnect_streamed', '1', // Reconnect to input stream
-      '-reconnect_delay_max', '3', // Reconnect max timeout 
+      '-reconnect_delay_max', '3', // Reconnect max timeout
       '-ss', "0", // Set start time for stream
-      '-to', info.duration.toString(), // Set end time for stream
+    ]
+    if (info.duration) {
+      options.push('-to', info.duration.toString()) // Set end time for stream
+    }
+    // prettier-ignore
+    options.push(
       '-i', info.url, // Input audio url
       '-c:a', codec, // Set audio codec
       '-vn', // Disable video processing
       '-f', 'webm', // Set format
       '-', // Pipe output to stdout
-    ])
+    )
+    const ffmpeg = execa('ffmpeg', options)
     invariant(ffmpeg.stdout, 'ffmpeg stdout should not be undefined')
 
     // Create audio resource from stream
