@@ -15,6 +15,7 @@ import { Logger } from './logger'
 import { YtDlp } from './yt-dlp'
 
 export type Playable = {
+  title: string
   url: string
 }
 
@@ -92,10 +93,10 @@ export default class Player {
     const info = await this.ytDlp.getMediaInfo(url)
     if (info._type === 'playlist') {
       for (const entry of info.entries) {
-        this.queue.push({ url: entry.url })
+        this.queue.push({ title: entry.title, url: entry.url })
       }
     } else {
-      this.queue.push({ url })
+      this.queue.push({ title: info.title, url })
     }
 
     // If player is not playing start playing
@@ -154,6 +155,20 @@ export default class Player {
 
     // Send resource to player to play
     this.subscription.player.play(resource)
+  }
+
+  next() {
+    if (!this._subscription) {
+      return
+    }
+
+    const current = this.queue.shift()
+    if (current) {
+      this.play(current)
+      return {
+        title: current.title,
+      }
+    }
   }
 
   disconnect() {

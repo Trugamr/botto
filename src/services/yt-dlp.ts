@@ -11,6 +11,7 @@ const PlaylistInfo = z.object({
   title: z.string(),
   entries: z.array(
     z.object({
+      title: z.string(),
       url: z.string(),
     }),
   ),

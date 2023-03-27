@@ -2,6 +2,7 @@ import { Client, Events, GatewayIntentBits, REST } from 'discord.js'
 import { Container } from 'inversify'
 import Bot from './bot.js'
 import { Disconnect } from './commands/disconnect.js'
+import Next from './commands/next.js'
 import Pause from './commands/pause.js'
 import Ping from './commands/ping.js'
 import Play from './commands/play.js'
@@ -53,7 +54,7 @@ container
   .inSingletonScope()
 
 // Commands
-const commands = [Ping, Play, Disconnect, Stop, Pause, Resume]
+const commands = [Ping, Play, Disconnect, Stop, Pause, Resume, Next]
 for (const command of commands) {
   container.bind<Command>(TYPES.Command).to(command).inSingletonScope()
 }
