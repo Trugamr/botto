@@ -101,9 +101,23 @@ export default class Player {
     // If player is not playing start playing
     if (this.status !== AudioPlayerStatus.Playing) {
       const current = this.queue.shift()
-      invariant(current, 'current should not be undefined')
+      if (current) {
+        this.play(current)
+      }
+    }
 
-      this.play(current)
+    switch (info._type) {
+      case 'playlist':
+        return {
+          type: 'playlist',
+          title: info.title,
+          count: info.entries.length,
+        } as const
+      default:
+        return {
+          type: 'track',
+          title: info.title,
+        } as const
     }
   }
 
@@ -156,6 +170,7 @@ export default class Player {
     if (!this._subscription) {
       return
     }
+    this.queue.length = 0
     this._subscription.player.stop()
   }
 

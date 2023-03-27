@@ -43,7 +43,7 @@ export default class Play implements Command {
     const url = result.data
 
     // Tasks after this can take more than 3 seconds to complete
-    await interaction.deferReply({ ephemeral: true })
+    await interaction.deferReply()
 
     // Get connection
     const connection = this.voice.get(interaction.guild.id)
@@ -54,8 +54,17 @@ export default class Play implements Command {
     const player = this.players.get(connection)
 
     // TODO: Send error if stream could not start successfully
-    await player.enqueue(url)
+    const queued = await player.enqueue(url)
 
-    await interaction.editReply('Playing')
+    if (queued.type === 'playlist') {
+      await interaction.editReply(
+        `Queued **${queued.count}** ${queued.count > 1 ? 'tracks' : 'track'} from **${
+          queued.title
+        }**`,
+      )
+      return
+    }
+
+    await interaction.editReply(`**${queued.title}** added to queue`)
   }
 }

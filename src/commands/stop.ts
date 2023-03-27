@@ -30,6 +30,6 @@ export default class Stop implements Command {
     player.stop()
 
     // TODO: Ensure player stop state?
-    await interaction.reply('Playback stoppped')
+    await interaction.reply('Playback stopped')
   }
 }

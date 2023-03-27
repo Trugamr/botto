@@ -1,15 +1,25 @@
 import { getVoiceConnection, joinVoiceChannel } from '@discordjs/voice'
 import { VoiceChannel } from 'discord.js'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
+import TYPES from '../types'
+import { Logger } from './logger'
 
 @injectable()
 export class Voice {
+  constructor(@inject(TYPES.Logger) private readonly logger: Logger) {}
+
   join(channel: VoiceChannel) {
-    return joinVoiceChannel({
+    const connection = joinVoiceChannel({
       channelId: channel.id,
       guildId: channel.guild.id,
       adapterCreator: channel.guild.voiceAdapterCreator,
     })
+
+    connection.on('stateChange', (prev, current) => {
+      this.logger.info(`Voice connection state changed: ${prev.status} -> ${current.status}`)
+    })
+
+    return connection
   }
 
   disconnect(guildId: string) {

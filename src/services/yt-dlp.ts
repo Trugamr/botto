@@ -8,6 +8,7 @@ export type MediaInfo = z.infer<typeof MediaInfoSchema>
 
 const PlaylistInfo = z.object({
   _type: z.literal('playlist'),
+  title: z.string(),
   entries: z.array(
     z.object({
       url: z.string(),
@@ -18,6 +19,7 @@ const PlaylistInfo = z.object({
 const VideoInfo = z.object({
   _type: z.literal('video'),
   url: z.string(),
+  title: z.string(),
   duration: z.number().optional(),
   acodec: z.string().optional(),
   audio_ext: z.string().optional(),
