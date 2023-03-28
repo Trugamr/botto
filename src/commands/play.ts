@@ -53,18 +53,26 @@ export default class Play implements Command {
     invariant(interaction.guild, 'guild info should pe present on interaction')
     const player = this.players.get(connection)
 
-    // TODO: Send error if stream could not start successfully
-    const queued = await player.enqueue(url)
+    try {
+      // TODO: Send error if stream could not start successfully
+      const queued = await player.enqueue(url)
 
-    if (queued.type === 'playlist') {
-      await interaction.editReply(
-        `Queued **${queued.count}** ${queued.count > 1 ? 'tracks' : 'track'} from **${
-          queued.title
-        }**`,
-      )
-      return
+      if (queued.type === 'playlist') {
+        await interaction.editReply(
+          `Queued **${queued.count}** ${queued.count > 1 ? 'tracks' : 'track'} from **${
+            queued.title
+          }**`,
+        )
+        return
+      }
+
+      await interaction.editReply(`**${queued.title}** added to queue`)
+    } catch (error) {
+      if (error instanceof Error) {
+        await interaction.editReply(error.message)
+        return
+      }
+      await interaction.editReply('An unknown error occurred')
     }
-
-    await interaction.editReply(`**${queued.title}** added to queue`)
   }
 }

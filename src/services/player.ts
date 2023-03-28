@@ -1,6 +1,7 @@
 import {
   AudioPlayer,
   AudioPlayerStatus,
+  NoSubscriberBehavior,
   PlayerSubscription,
   StreamType,
   VoiceConnection,
@@ -12,7 +13,7 @@ import { inject } from 'inversify'
 import invariant from 'tiny-invariant'
 import TYPES from '../types'
 import { Logger } from './logger'
-import { YtDlp } from './yt-dlp'
+import { MediaInfo, YtDlp } from './yt-dlp'
 
 export type Playable = {
   title: string
@@ -36,6 +37,7 @@ export default class Player {
       behaviors: {
         // Helps with frame drops in live streams
         maxMissedFrames: 50,
+        noSubscriber: NoSubscriberBehavior.Pause,
       },
     })
     this.setup(player)
@@ -95,7 +97,19 @@ export default class Player {
 
   async enqueue(url: string) {
     // Check if url is live stream, playlist or single playable media
-    const info = await this.ytDlp.getMediaInfo(url)
+    let info: MediaInfo | undefined = undefined
+    try {
+      info = await this.ytDlp.getMediaInfo(url)
+    } catch (error) {
+      const message = `Failed to get media info for ${url}`
+      if (error instanceof Error) {
+        this.logger.error(`${message}\n${error.message}`)
+      } else {
+        this.logger.error(message)
+      }
+      throw new Error('Failed to get media info')
+    }
+
     if (info._type === 'playlist') {
       for (const entry of info.entries) {
         this.queue.push({ title: entry.title, url: entry.url })
@@ -129,7 +143,13 @@ export default class Player {
 
   private async play(playable: Playable) {
     // Get info about media
-    const info = await this.ytDlp.getMediaInfo(playable.url)
+    let info: MediaInfo | undefined = undefined
+    try {
+      info = await this.ytDlp.getMediaInfo(playable.url)
+    } catch (error) {
+      // Try to play next track
+      return this.next()
+    }
     invariant(info._type === 'video', 'only video link can be played')
 
     // Create audio stream from url
@@ -165,6 +185,10 @@ export default class Player {
 
     // Send resource to player to play
     this.subscription.player.play(resource)
+
+    return {
+      title: info.title,
+    }
   }
 
   next() {
