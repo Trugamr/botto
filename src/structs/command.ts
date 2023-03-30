@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { AutocompleteInteraction, CommandInteraction, SlashCommandBuilder } from 'discord.js'
 
 export enum Feature {
   Voice,
@@ -11,4 +11,5 @@ export default interface Command {
   readonly features: Feature[]
 
   handle(interaction: CommandInteraction): Promise<void>
+  autocomplete?(interaction: AutocompleteInteraction): Promise<void>
 }

@@ -1,11 +1,14 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import {
+  AutocompleteInteraction,
+  ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from 'discord.js'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
 import { z } from 'zod'
 import Players from '../managers/players.js'
 import { Logger } from '../services/logger.js'
 import { Voice } from '../services/voice.js'
-import { YtDlp } from '../services/yt-dlp.js'
 import Command, { Feature } from '../structs/command.js'
 import TYPES from '../types.js'
 
@@ -17,12 +20,15 @@ export default class Play implements Command {
     .setName('play')
     .setDescription('Search or play music using a link')
     .addStringOption(option =>
-      option.setName('query').setDescription('Youtube video url').setRequired(true),
+      option
+        .setName('query')
+        .setDescription('Youtube video url')
+        .setAutocomplete(true)
+        .setRequired(true),
     )
   readonly features = [Feature.Voice]
 
   constructor(
-    @inject(TYPES.YtDlp) private readonly ytDlp: YtDlp,
     @inject(TYPES.Voice) private readonly voice: Voice,
     @inject(TYPES.Players) private readonly players: Players,
     @inject(TYPES.Logger) private readonly logger: Logger,
@@ -74,5 +80,25 @@ export default class Play implements Command {
       }
       await interaction.editReply('An unknown error occurred')
     }
+  }
+
+  async autocomplete(interaction: AutocompleteInteraction) {
+    const query = interaction.options.getString('query', true)
+
+    // Return empty array if query is a valid url
+    const parsed = await z.string().url().safeParseAsync(query)
+    if (parsed.success) {
+      await interaction.respond([])
+      return
+    }
+
+    // TODO: Query different sources for results
+
+    await interaction.respond([
+      {
+        name: 'Pipes',
+        value: 'https://www.youtube.com/watch?v=f8mL0_4GeV0',
+      },
+    ])
   }
 }

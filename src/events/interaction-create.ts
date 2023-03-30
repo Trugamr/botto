@@ -56,6 +56,15 @@ export default class InteractionCreate implements Event<Events.InteractionCreate
       }
 
       await command.handle(interaction)
+    } else if (interaction.isAutocomplete()) {
+      const command = this.commandsByName.get(interaction.commandName)
+      if (!command) {
+        return
+      }
+
+      if (command.autocomplete) {
+        await command.autocomplete(interaction)
+      }
     }
   }
 }
