@@ -1,4 +1,5 @@
 import { injectable } from 'inversify'
+import ytsr from 'ytsr'
 
 @injectable()
 export class Youtube {
@@ -18,5 +19,9 @@ export class Youtube {
     }
 
     throw new Error('Invalid or unsupported youtube url')
+  }
+
+  search(query: string, options?: ytsr.Options) {
+    return ytsr(query, options)
   }
 }

@@ -1,4 +1,6 @@
+import { writeFile } from 'fs/promises'
 import {
+  ApplicationCommandOptionChoiceData,
   AutocompleteInteraction,
   ChatInputCommandInteraction,
   SlashCommandBuilder,
@@ -9,6 +11,7 @@ import { z } from 'zod'
 import Players from '../managers/players.js'
 import { Logger } from '../services/logger.js'
 import { Voice } from '../services/voice.js'
+import { Youtube } from '../services/youtube.js'
 import Command, { Feature } from '../structs/command.js'
 import TYPES from '../types.js'
 
@@ -32,6 +35,7 @@ export default class Play implements Command {
     @inject(TYPES.Voice) private readonly voice: Voice,
     @inject(TYPES.Players) private readonly players: Players,
     @inject(TYPES.Logger) private readonly logger: Logger,
+    @inject(TYPES.Youtube) private readonly youtube: Youtube,
   ) {}
 
   async handle(interaction: ChatInputCommandInteraction) {
@@ -92,13 +96,28 @@ export default class Play implements Command {
       return
     }
 
+    if (query.length === 0) {
+      await interaction.respond([])
+      return
+    }
+
     // TODO: Query different sources for results
 
-    await interaction.respond([
-      {
-        name: 'Pipes',
-        value: 'https://www.youtube.com/watch?v=f8mL0_4GeV0',
-      },
-    ])
+    try {
+      const { items } = await this.youtube.search(query, { limit: 16 })
+      const options: ApplicationCommandOptionChoiceData<string>[] = items
+        .filter(item => item.type === 'video')
+        .map(item => {
+          invariant(item.type === 'video', 'item type should be video')
+          return {
+            name: item.title,
+            value: item.url,
+          }
+        })
+      await interaction.respond(options)
+    } catch (error) {
+      this.logger.error(`Error while searching for ${query} - ${error}`)
+      await interaction.respond([])
+    }
   }
 }
