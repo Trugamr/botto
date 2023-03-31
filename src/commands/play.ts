@@ -25,9 +25,15 @@ export default class Play implements Command {
     .addStringOption(option =>
       option
         .setName('query')
-        .setDescription('Youtube video url')
+        .setDescription('Query tracks or send a link to play')
         .setAutocomplete(true)
         .setRequired(true),
+    )
+    .addBooleanOption(option =>
+      option
+        .setName('prepend')
+        .setDescription('Add to the front of the queue')
+        .setRequired(false),
     )
   readonly features = [Feature.Voice]
 
@@ -42,6 +48,8 @@ export default class Play implements Command {
     invariant(interaction.guild, 'play interaction must have guild')
 
     const query = interaction.options.getString('query', true)
+    const prepend = interaction.options.getBoolean('prepend') ?? false
+
     const result = await z.string().url().safeParseAsync(query)
     if (!result.success) {
       await interaction.reply({
@@ -65,7 +73,7 @@ export default class Play implements Command {
 
     try {
       // TODO: Send error if stream could not start successfully
-      const queued = await player.enqueue(url)
+      const queued = await player.enqueue(url, { prepend })
 
       if (queued.type === 'playlist') {
         await interaction.editReply(

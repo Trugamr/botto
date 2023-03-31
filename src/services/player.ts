@@ -22,6 +22,10 @@ export type Playable = {
 
 // TODO: Handle info and stream errors gracefully
 
+type EnqueOptions = {
+  prepend?: boolean
+}
+
 export default class Player {
   private _subscription: PlayerSubscription | undefined
   private readonly queue: Playable[] = []
@@ -95,7 +99,7 @@ export default class Player {
     return this._subscription
   }
 
-  async enqueue(url: string) {
+  async enqueue(url: string, { prepend }: EnqueOptions = {}) {
     // Check if url is live stream, playlist or single playable media
     let info: MediaInfo | undefined = undefined
     try {
@@ -112,10 +116,20 @@ export default class Player {
 
     if (info._type === 'playlist') {
       for (const entry of info.entries) {
-        this.queue.push({ title: entry.title, url: entry.url })
+        const item = { title: entry.title, url: entry.url }
+        if (prepend) {
+          this.queue.unshift(item)
+        } else {
+          this.queue.push(item)
+        }
       }
     } else {
-      this.queue.push({ title: info.title, url })
+      const item = { title: info.title, url }
+      if (prepend) {
+        this.queue.unshift(item)
+      } else {
+        this.queue.push(item)
+      }
     }
 
     // If player is not playing start playing
