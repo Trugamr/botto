@@ -12,6 +12,7 @@ import TYPES from '../types'
 export default class Players {
   private readonly players = new Collection<Snowflake, Player>()
 
+  // TODO: Consider returning null and add method to create new player if one doesn't exist
   get(connection: VoiceConnection) {
     const id = connection.joinConfig.guildId
     // Create new player if one doesn't exist

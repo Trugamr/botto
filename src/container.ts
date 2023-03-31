@@ -10,6 +10,7 @@ import Resume from './commands/resume.js'
 import Stop from './commands/stop.js'
 import ClientReady from './events/client-ready.js'
 import InteractionCreate from './events/interaction-create.js'
+import VoiceStateUpdate from './events/voice-state-update.js'
 import Players from './managers/players.js'
 import Config from './services/config.js'
 import { Logger, logger } from './services/logger.js'
@@ -51,6 +52,10 @@ container.bind<Event<Events.ClientReady>>(TYPES.Event).to(ClientReady).inSinglet
 container
   .bind<Event<Events.InteractionCreate>>(TYPES.Event)
   .to(InteractionCreate)
+  .inSingletonScope()
+container
+  .bind<Event<Events.VoiceStateUpdate>>(TYPES.Event)
+  .to(VoiceStateUpdate)
   .inSingletonScope()
 
 // Commands

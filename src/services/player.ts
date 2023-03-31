@@ -41,7 +41,7 @@ export default class Player {
       behaviors: {
         // Helps with frame drops in live streams
         maxMissedFrames: 50,
-        noSubscriber: NoSubscriberBehavior.Pause,
+        noSubscriber: NoSubscriberBehavior.Stop,
       },
     })
     this.setup(player)
