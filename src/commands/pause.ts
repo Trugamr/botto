@@ -28,7 +28,7 @@ export default class Pause implements Command {
     }
 
     const player = this.players.get(connection)
-    if (player.status === AudioPlayerStatus.Paused) {
+    if (player.paused && player.paused.by === 'user') {
       await interaction.reply('Playback is already paused')
       return
     }

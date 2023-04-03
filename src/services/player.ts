@@ -26,9 +26,19 @@ type EnqueOptions = {
   prepend?: boolean
 }
 
+type PauseOptions = {
+  by?: 'user' | 'system'
+}
+
+/**
+ * Player is paused by system when no other people are in the voice channel
+ */
+type Paused = false | { by: Exclude<PauseOptions['by'], undefined> }
+
 export default class Player {
   private _subscription: PlayerSubscription | undefined
   private readonly queue: Playable[] = []
+  paused: Paused = false
 
   constructor(
     readonly connection: VoiceConnection,
@@ -62,7 +72,10 @@ export default class Player {
         if (next) {
           this.play(next)
         }
+      } else if (current.status === AudioPlayerStatus.Playing) {
+        this.paused = false
       }
+
       this.logger.info(`Player state changed: ${prev.status} -> ${current.status}`)
     })
   }
@@ -237,10 +250,11 @@ export default class Player {
     this._subscription.player.stop()
   }
 
-  pause() {
+  pause({ by = 'user' }: PauseOptions = {}) {
     if (!this._subscription) {
       return
     }
+    this.paused = { by }
     this._subscription.player.pause()
   }
 
