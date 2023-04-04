@@ -11,9 +11,9 @@ import {
 import { execa } from 'execa'
 import { inject } from 'inversify'
 import invariant from 'tiny-invariant'
-import TYPES from '../types'
-import { Logger } from './logger'
-import { MediaInfo, YtDlp } from './yt-dlp'
+import TYPES from '../types.js'
+import { Logger } from './logger.js'
+import { MediaInfo, YtDlp } from './yt-dlp.js'
 
 export type Playable = {
   title: string
@@ -65,7 +65,7 @@ export default class Player {
    * Setup event listeners on player
    */
   private setup(player: AudioPlayer) {
-    player.on('stateChange', (prev, current) => {
+    player.on('stateChange', (previous, current) => {
       if (current.status === AudioPlayerStatus.Idle) {
         // Play next song
         const next = this.queue.shift()
@@ -76,7 +76,7 @@ export default class Player {
         this.paused = false
       }
 
-      this.logger.info(`Player state changed: ${prev.status} -> ${current.status}`)
+      this.logger.info(`Player state changed: ${previous.status} -> ${current.status}`)
     })
   }
 
@@ -84,7 +84,6 @@ export default class Player {
     if (this._subscription) {
       return this._subscription.player.state.status
     }
-    return null
   }
 
   /**
@@ -114,7 +113,7 @@ export default class Player {
 
   async enqueue(url: string, { prepend }: EnqueOptions = {}) {
     // Check if url is live stream, playlist or single playable media
-    let info: MediaInfo | undefined = undefined
+    let info: MediaInfo | undefined
     try {
       info = await this.ytDlp.getMediaInfo(url)
     } catch (error) {
@@ -154,26 +153,28 @@ export default class Player {
     }
 
     switch (info._type) {
-      case 'playlist':
+      case 'playlist': {
         return {
           type: 'playlist',
           title: info.title,
           count: info.entries.length,
         } as const
-      default:
+      }
+      default: {
         return {
           type: 'track',
           title: info.title,
         } as const
+      }
     }
   }
 
   private async play(playable: Playable) {
     // Get info about media
-    let info: MediaInfo | undefined = undefined
+    let info: MediaInfo | undefined
     try {
       info = await this.ytDlp.getMediaInfo(playable.url)
-    } catch (error) {
+    } catch {
       // Try to play next track
       return this.next()
     }

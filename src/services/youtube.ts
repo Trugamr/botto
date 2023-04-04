@@ -5,17 +5,18 @@ import ytsr from 'ytsr'
 export class Youtube {
   parse<T extends string>(url: T): { type: 'video' | 'playlist'; url: T } {
     const { host, searchParams } = new URL(url)
-    const params = Object.fromEntries(searchParams)
+    const parameters = Object.fromEntries(searchParams)
 
     // TODO: Add more hostnames
     switch (host) {
       case 'www.youtube.com':
-      case 'music.youtube.com':
-        if ('list' in params) {
+      case 'music.youtube.com': {
+        if ('list' in parameters) {
           return { type: 'playlist', url }
-        } else if ('v' in params) {
+        } else if ('v' in parameters) {
           return { type: 'video', url }
         }
+      }
     }
 
     throw new Error('Invalid or unsupported youtube url')

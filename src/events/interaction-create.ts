@@ -1,10 +1,10 @@
 import { ChannelType, Collection, Events, Interaction } from 'discord.js'
 import { inject, injectable, multiInject } from 'inversify'
 import invariant from 'tiny-invariant'
-import { Voice } from '../services/voice'
-import Command, { Feature } from '../structs/command'
-import Event from '../structs/event'
-import TYPES from '../types'
+import { Voice } from '../services/voice.js'
+import Command, { Feature } from '../structs/command.js'
+import Event from '../structs/event.js'
+import TYPES from '../types.js'
 
 @injectable()
 export default class InteractionCreate implements Event<Events.InteractionCreate> {

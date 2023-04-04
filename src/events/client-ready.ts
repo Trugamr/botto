@@ -1,8 +1,8 @@
 import { Client, Events } from 'discord.js'
 import { inject, injectable } from 'inversify'
-import { Logger } from '../services/logger'
-import Event from '../structs/event'
-import TYPES from '../types'
+import { Logger } from '../services/logger.js'
+import Event from '../structs/event.js'
+import TYPES from '../types.js'
 
 @injectable()
 export default class ClientReady implements Event<Events.ClientReady> {

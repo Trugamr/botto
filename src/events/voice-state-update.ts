@@ -2,11 +2,11 @@ import { AudioPlayerStatus } from '@discordjs/voice'
 import { Client, Events, GuildChannel, VoiceState } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
-import Players from '../managers/players'
-import { Logger } from '../services/logger'
-import { Voice } from '../services/voice'
-import Event from '../structs/event'
-import TYPES from '../types'
+import Players from '../managers/players.js'
+import { Logger } from '../services/logger.js'
+import { Voice } from '../services/voice.js'
+import Event from '../structs/event.js'
+import TYPES from '../types.js'
 
 @injectable()
 export default class VoiceStateUpdate implements Event<Events.VoiceStateUpdate> {
@@ -20,10 +20,10 @@ export default class VoiceStateUpdate implements Event<Events.VoiceStateUpdate> 
     @inject(TYPES.Players) private readonly players: Players,
   ) {}
 
-  readonly listener = async (prev: VoiceState, current: VoiceState) => {
+  readonly listener = async (previous: VoiceState, current: VoiceState) => {
     invariant(this.client.user, 'client user should not be null')
 
-    const channel = prev.channel ?? current.channel
+    const channel = previous.channel ?? current.channel
     if (!channel) {
       return
     }
@@ -32,11 +32,11 @@ export default class VoiceStateUpdate implements Event<Events.VoiceStateUpdate> 
 
     // Bot is alone in the channel that user left
     if (
-      prev.channel &&
-      prev.channel.members.has(this.client.user.id) &&
-      prev.channel.members.size === 1
+      previous.channel &&
+      previous.channel.members.has(this.client.user.id) &&
+      previous.channel.members.size === 1
     ) {
-      payload = { channel: prev.channel, action: 'pause' }
+      payload = { channel: previous.channel, action: 'pause' }
     }
 
     // Bot is not alone anymore in the channel that user joined

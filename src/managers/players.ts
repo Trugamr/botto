@@ -3,10 +3,10 @@ import { Collection, Snowflake } from 'discord.js'
 import { injectable } from 'inversify'
 import invariant from 'tiny-invariant'
 import { Logger } from 'winston'
-import container from '../container'
-import Player from '../services/player'
-import { YtDlp } from '../services/yt-dlp'
-import TYPES from '../types'
+import container from '../container.js'
+import Player from '../services/player.js'
+import { YtDlp } from '../services/yt-dlp.js'
+import TYPES from '../types.js'
 
 @injectable()
 export default class Players {

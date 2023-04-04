@@ -2,10 +2,10 @@ import { VoiceConnectionStatus, entersState } from '@discordjs/voice'
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import invariant from 'tiny-invariant'
-import Players from '../managers/players'
-import { Voice } from '../services/voice'
-import Command from '../structs/command'
-import TYPES from '../types'
+import Players from '../managers/players.js'
+import { Voice } from '../services/voice.js'
+import Command from '../structs/command.js'
+import TYPES from '../types.js'
 
 @injectable()
 export class Disconnect implements Command {
@@ -34,7 +34,7 @@ export class Disconnect implements Command {
 
     await interaction.deferReply()
 
-    await entersState(connection, VoiceConnectionStatus.Destroyed, 5_000)
+    await entersState(connection, VoiceConnectionStatus.Destroyed, 5000)
     await interaction.editReply('Disconnected from voice channel')
   }
 }
