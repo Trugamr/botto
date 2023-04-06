@@ -76,7 +76,7 @@ export default class Player {
         this.paused = false
       }
 
-      this.logger.info(`Player state changed: ${previous.status} -> ${current.status}`)
+      this.logger.debug(`Player state changed: ${previous.status} -> ${current.status}`)
     })
   }
 

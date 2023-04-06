@@ -16,7 +16,9 @@ export class Voice {
     })
 
     connection.on('stateChange', (previous, current) => {
-      this.logger.info(`Voice connection state changed: ${previous.status} -> ${current.status}`)
+      this.logger.debug(
+        `Voice connection state changed: ${previous.status} -> ${current.status}`,
+      )
     })
 
     return connection
