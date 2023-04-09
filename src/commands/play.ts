@@ -50,17 +50,26 @@ export default class Play implements Command {
     const prepend = interaction.options.getBoolean('prepend') ?? false
 
     const result = await z.string().url().safeParseAsync(query)
-    if (!result.success) {
-      await interaction.reply({
-        content: 'Invalid url provided in query',
-        ephemeral: true,
-      })
-      return
-    }
-    const url = result.data
 
     // Tasks after this can take more than 3 seconds to complete
     await interaction.deferReply()
+
+    // If query is a valid url, use it directly
+    let url: string | undefined
+    if (result.success) {
+      url = result.data
+    } else {
+      // Otherwise, try to search for a track
+      const { items } = await this.youtube.search(query)
+      const video = items.find(item => item.type === 'video')
+      if (!video) {
+        await interaction.editReply('No results found')
+        return
+      }
+
+      invariant(video.type === 'video', 'video type should be video')
+      url = video.url
+    }
 
     // Get connection
     const connection = this.voice.get(interaction.guild.id)
