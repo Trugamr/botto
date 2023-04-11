@@ -125,8 +125,11 @@ export default class Play implements Command {
         .filter(item => item.type === 'video')
         .map(item => {
           invariant(item.type === 'video', 'item type should be video')
+          // Upto 100 characters are allowed in option names in discord api
+          const name = item.title.length > 100 ? `${item.title.slice(0, 97)}...` : item.title
+
           return {
-            name: item.title,
+            name,
             value: item.url,
           }
         })
