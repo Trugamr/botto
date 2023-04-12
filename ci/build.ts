@@ -2,12 +2,14 @@ import 'dotenv/config'
 import { connect } from '@dagger.io/dagger'
 import type Client from '@dagger.io/dagger/dist/api/client.gen.js'
 import { z } from 'zod'
+import info from '../package.json' assert { type: 'json' }
 
 // Validate environment variables
-const { DOCKER_HUB_USERNAME, DOCKER_HUB_PASSWORD } = z
+const { REGISTRY_URL, REGISTRY_USERNAME, REGISTRY_PASSWORD } = z
   .object({
-    DOCKER_HUB_USERNAME: z.string().nonempty(),
-    DOCKER_HUB_PASSWORD: z.string().nonempty(),
+    REGISTRY_URL: z.string().nonempty().default('docker.io'),
+    REGISTRY_USERNAME: z.string().nonempty(),
+    REGISTRY_PASSWORD: z.string().nonempty(),
   })
   .parse(process.env)
 
@@ -52,12 +54,14 @@ async function pipeline(client: Client) {
     .withEntrypoint(['node', 'dist/index.js'])
 
   // Publish the image to registry
-  const password = client.setSecret('docker-hub-password', DOCKER_HUB_PASSWORD)
-  const address = await image
-    .withRegistryAuth('docker.io', DOCKER_HUB_USERNAME, password)
-    .publish(`${DOCKER_HUB_USERNAME}/botto`)
+  const password = client.setSecret('docker-hub-password', REGISTRY_PASSWORD)
+  const authed = image.withRegistryAuth(REGISTRY_URL, REGISTRY_USERNAME, password)
 
-  console.log('Published to registry', address)
+  const versioned = await authed.publish(`${REGISTRY_USERNAME}/botto:${info.version}`)
+  console.log('Published versioned image to registry', versioned)
+
+  const latest = await authed.publish(`${REGISTRY_USERNAME}/botto:latest`)
+  console.log('Published latest image to registry', latest)
 }
 
 // Run the pipeline
