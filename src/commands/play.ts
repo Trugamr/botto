@@ -60,8 +60,14 @@ export default class Play implements Command {
       url = result.data
     } else {
       // Otherwise, try to search for a track
-      const { items } = await this.youtube.search(query)
-      const video = items.find(item => item.type === 'video')
+      let result: Awaited<ReturnType<Youtube['search']>>
+      try {
+        result = await this.youtube.search(query)
+      } catch (error) {
+        await interaction.editReply('An error occurred while searching')
+        return
+      }
+      const video = result.items.find(item => item.type === 'video')
       if (!video) {
         await interaction.editReply('No results found')
         return
