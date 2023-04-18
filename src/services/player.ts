@@ -144,8 +144,11 @@ export default class Player {
       }
     }
 
-    // If player is not playing start playing
-    if (this.status !== AudioPlayerStatus.Playing) {
+    // If player is buffering or playing then don't start playing
+    if (
+      this.status &&
+      ![AudioPlayerStatus.Playing, AudioPlayerStatus.Buffering].includes(this.status)
+    ) {
       const current = this.queue.shift()
       if (current) {
         this.play(current)
