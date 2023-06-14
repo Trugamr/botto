@@ -1,4 +1,4 @@
-<img src="https://fading.blue/u/312435.png" width="128" height="128">
+<img src="assets/icon.png" width="128" height="128">
 
 # Botto 🦦
 
