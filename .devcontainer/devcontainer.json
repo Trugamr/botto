@@ -1,0 +1,12 @@
+{
+  "name": "Debian",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "nodeGypDependencies": true,
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers-contrib/features/ffmpeg-apt-get:1": {},
+    "ghcr.io/devcontainers-contrib/features/yt-dlp:2": {}
+  }
+}
