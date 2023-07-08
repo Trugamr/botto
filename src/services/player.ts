@@ -100,7 +100,6 @@ export default class Player {
     // If connection is not same then re-attach
     if (this._subscription.connection !== connection) {
       this._subscription.player.stop()
-      this._subscription.connection.destroy()
       this._subscription.unsubscribe()
       this._subscription = this.create(connection)
     }

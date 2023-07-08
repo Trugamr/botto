@@ -1,4 +1,4 @@
-import { getVoiceConnection, joinVoiceChannel } from '@discordjs/voice'
+import { VoiceConnectionStatus, getVoiceConnection, joinVoiceChannel } from '@discordjs/voice'
 import { VoiceChannel } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import TYPES from '../types.js'
@@ -26,7 +26,7 @@ export class Voice {
 
   disconnect(guildId: string) {
     const connection = this.get(guildId)
-    if (connection) {
+    if (connection && connection.state.status !== VoiceConnectionStatus.Destroyed) {
       connection.destroy()
     }
   }
