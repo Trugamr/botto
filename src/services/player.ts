@@ -5,6 +5,7 @@ import {
   PlayerSubscription,
   StreamType,
   VoiceConnection,
+  VoiceConnectionStatus,
   createAudioPlayer,
   createAudioResource,
 } from '@discordjs/voice'
@@ -42,7 +43,7 @@ export default class Player {
 
   constructor(
     readonly connection: VoiceConnection,
-    @inject(TYPES.Logger) private readonly logger: Logger,
+    @inject(TYPES.Logger) readonly logger: Logger,
     @inject(TYPES.YtDlp) private readonly ytDlp: YtDlp,
   ) {}
 
@@ -58,6 +59,7 @@ export default class Player {
 
     const subscription = connection.subscribe(player)
     invariant(subscription, 'subscription should not be undefined')
+
     return subscription
   }
 
@@ -241,7 +243,6 @@ export default class Player {
       return
     }
     this.stop()
-    this._subscription.connection.destroy()
     this._subscription.unsubscribe()
     this._subscription = undefined
   }

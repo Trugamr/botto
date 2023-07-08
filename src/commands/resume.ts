@@ -29,7 +29,9 @@ export default class Resume implements Command {
       return
     }
 
-    const player = this.players.get(connection)
+    const player = this.players.get(connection, true)
+    invariant(player, 'player should exist if connection exists')
+
     if (player.status !== AudioPlayerStatus.Paused) {
       await interaction.reply('Nothing to resume')
       return

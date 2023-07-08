@@ -26,7 +26,9 @@ export default class Stop implements Command {
       return
     }
 
-    const player = this.players.get(connection)
+    const player = this.players.get(connection, true)
+    invariant(player, 'player should exist if connection exists')
+
     player.stop()
 
     // TODO: Ensure player stop state?

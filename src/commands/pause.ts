@@ -26,7 +26,9 @@ export default class Pause implements Command {
       return
     }
 
-    const player = this.players.get(connection)
+    const player = this.players.get(connection, true)
+    invariant(player, 'player should exist if connection exists')
+
     if (player.paused && player.paused.by === 'user') {
       await interaction.reply('Playback is already paused')
       return

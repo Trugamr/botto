@@ -28,9 +28,15 @@ export class Disconnect implements Command {
       await interaction.reply('No voice channel is currently joined')
       return
     }
+    // Destroy the connection
+    connection.destroy()
 
+    // Destroying connection disconnects and removes player from cache
+    // We do it explicitly here to make sure it's destroyed
     const player = this.players.get(connection)
-    player.disconnect()
+    if (player) {
+      player.disconnect()
+    }
 
     await interaction.deferReply()
 

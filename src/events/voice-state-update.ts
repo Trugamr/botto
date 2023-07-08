@@ -57,7 +57,8 @@ export default class VoiceStateUpdate implements Event<Events.VoiceStateUpdate> 
       return
     }
 
-    const player = this.players.get(connection)
+    const player = this.players.get(connection, true)
+    invariant(player, 'player should exist if connection exists')
 
     if (
       payload.action === 'pause' &&

@@ -26,7 +26,8 @@ export default class Next implements Command {
       return
     }
 
-    const player = this.players.get(connection)
+    const player = this.players.get(connection, true)
+    invariant(player, 'player should exist if connection exists')
     const next = player.next()
 
     if (next) {

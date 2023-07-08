@@ -83,7 +83,8 @@ export default class Play implements Command {
 
     // Get player
     invariant(interaction.guild, 'guild info should pe present on interaction')
-    const player = this.players.get(connection)
+    const player = this.players.get(connection, true)
+    invariant(player, 'player should not be undefined')
 
     try {
       // TODO: Send error if stream could not start successfully
