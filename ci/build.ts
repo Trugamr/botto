@@ -27,7 +27,7 @@ async function pipeline(client: Client) {
   const development = base()
     .withMountedDirectory('/app', source)
     .withWorkdir('/app')
-    .withExec(['pnpm', 'install'])
+    .withExec(['pnpm', 'install', '--frozen-lockfile'])
 
   // Remove dev dependencies
   const production = base()
