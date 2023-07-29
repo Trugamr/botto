@@ -17,7 +17,7 @@ const { REGISTRY_URL, REGISTRY_USERNAME, REGISTRY_PASSWORD } = z
 async function pipeline(client: Client) {
   // Create base image that has pnpm
   const base = () => {
-    return client.container().from('node:18.15.0-alpine').withExec(['corepack', 'enable'])
+    return client.container().from('node:18.17.0-alpine').withExec(['corepack', 'enable'])
   }
 
   // Create source directory
@@ -25,14 +25,23 @@ async function pipeline(client: Client) {
 
   // Install all dependencies
   const development = base()
-    .withMountedDirectory('/app', source)
+    // Required for building native dependencies like @discordjs/opus
+    .withExec(['apk', 'add', 'python3', 'make', 'g++'])
     .withWorkdir('/app')
+    // Only copy the files required for installing dependencies
+    .withFile('package.json', source.file('package.json'))
+    .withFile('pnpm-lock.yaml', source.file('pnpm-lock.yaml'))
+    .withDirectory('patches', source.directory('patches'))
     .withExec(['pnpm', 'install', '--frozen-lockfile'])
 
   // Remove dev dependencies
   const production = base()
-    .withMountedDirectory('/app', source)
     .withWorkdir('/app')
+    // Copy the files required for pruning
+    .withFile('package.json', development.file('package.json'))
+    .withFile('pnpm-lock.yaml', development.file('pnpm-lock.yaml'))
+    .withDirectory('patches', development.directory('patches'))
+    // Copy the installed dependencies from the development image
     .withDirectory('node_modules', development.directory('node_modules'))
     .withExec(['pnpm', 'prune', '--prod'])
 
