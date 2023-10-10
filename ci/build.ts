@@ -1,15 +1,15 @@
 import 'dotenv/config'
 import { connect } from '@dagger.io/dagger'
-import type Client from '@dagger.io/dagger/dist/api/client.gen.js'
+import type {Client} from '@dagger.io/dagger';
 import { z } from 'zod'
 import info from '../package.json' assert { type: 'json' }
 
 // Validate environment variables
 const { REGISTRY_URL, REGISTRY_USERNAME, REGISTRY_PASSWORD } = z
   .object({
-    REGISTRY_URL: z.string().nonempty().default('docker.io'),
-    REGISTRY_USERNAME: z.string().nonempty(),
-    REGISTRY_PASSWORD: z.string().nonempty(),
+    REGISTRY_URL: z.string().min(1).default('docker.io'),
+    REGISTRY_USERNAME: z.string().min(1),
+    REGISTRY_PASSWORD: z.string().min(1),
   })
   .parse(process.env)
 
@@ -17,7 +17,7 @@ const { REGISTRY_URL, REGISTRY_USERNAME, REGISTRY_PASSWORD } = z
 async function pipeline(client: Client) {
   // Create base image that has pnpm
   const base = () => {
-    return client.container().from('node:18.17.0-alpine').withExec(['corepack', 'enable'])
+    return client.container().from('node:18.18.0-alpine3.18').withExec(['corepack', 'enable'])
   }
 
   // Create source directory
@@ -31,7 +31,6 @@ async function pipeline(client: Client) {
     // Only copy the files required for installing dependencies
     .withFile('package.json', source.file('package.json'))
     .withFile('pnpm-lock.yaml', source.file('pnpm-lock.yaml'))
-    .withDirectory('patches', source.directory('patches'))
     .withExec(['pnpm', 'install', '--frozen-lockfile'])
 
   // Remove dev dependencies
@@ -40,7 +39,6 @@ async function pipeline(client: Client) {
     // Copy the files required for pruning
     .withFile('package.json', development.file('package.json'))
     .withFile('pnpm-lock.yaml', development.file('pnpm-lock.yaml'))
-    .withDirectory('patches', development.directory('patches'))
     // Copy the installed dependencies from the development image
     .withDirectory('node_modules', development.directory('node_modules'))
     .withExec(['pnpm', 'prune', '--prod'])
@@ -59,7 +57,6 @@ async function pipeline(client: Client) {
     .withDirectory('node_modules', production.directory('node_modules'))
     .withDirectory('dist', build.directory('dist'))
     .withFile('package.json', build.file('package.json'))
-    .withExposedPort(3000)
     .withEntrypoint(['node', 'dist/index.js'])
 
   // Publish the image to registry
