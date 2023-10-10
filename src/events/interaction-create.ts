@@ -31,7 +31,7 @@ export default class InteractionCreate implements Event<Events.InteractionCreate
       }
 
       // TODO: Send error message
-      invariant(interaction.guild, 'Commands can only be used in guild')
+      invariant(interaction.guild, 'commands can only be used in guild')
 
       // Command requires voice connection
       if (command.features.includes(Feature.Voice)) {

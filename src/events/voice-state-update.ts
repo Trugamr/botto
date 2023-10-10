@@ -66,10 +66,10 @@ export default class VoiceStateUpdate implements Event<Events.VoiceStateUpdate> 
       [AudioPlayerStatus.Playing, AudioPlayerStatus.Buffering].includes(player.status)
     ) {
       player.pause({ by: 'system' })
-      this.logger.debug(`Pausing as bot is the only one left in the channel: ${channel.name}`)
+      this.logger.debug(`Pausing as bot is the only one left in the channel`)
     } else if (payload.action === 'resume' && player.paused && player.paused.by === 'system') {
       player.resume()
-      this.logger.debug(`Resuming as bot now has company in the channel: ${channel.name}`)
+      this.logger.debug(`Resuming as bot now has company in the channel`)
     }
   }
 }

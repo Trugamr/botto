@@ -51,4 +51,9 @@ export default class Bot {
     // Connect and start listening for events
     await this.client.login(this.config.get('DISCORD_BOT_TOKEN'))
   }
+
+  async destroy() {
+    this.logger.info('Destroying bot instance')
+    await this.client.destroy()
+  }
 }
