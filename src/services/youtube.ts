@@ -1,8 +1,10 @@
 import { injectable } from 'inversify'
-import ytsr from 'ytsr'
+import { Innertube, YTNodes } from 'youtubei.js'
 
 @injectable()
 export class Youtube {
+  private api: Innertube | undefined
+
   parse<T extends string>(url: T): { type: 'video' | 'playlist'; url: T } {
     const { host, searchParams } = new URL(url)
     const parameters = Object.fromEntries(searchParams)
@@ -22,7 +24,23 @@ export class Youtube {
     throw new Error('Invalid or unsupported youtube url')
   }
 
-  search(query: string, options?: ytsr.Options) {
-    return ytsr(query, options)
+  /**
+   * Search for a video
+   */
+  async search(query: string) {
+    const api = await this.getAPI()
+    const result = await api.search(query, { type: 'video' })
+    // Filter out non-video results
+    return result.videos.filter(video => video.is(YTNodes.Video))
+  }
+
+  /**
+   * Get the cached youtube api instance
+   */
+  private async getAPI() {
+    if (!this.api) {
+      this.api = await Innertube.create()
+    }
+    return this.api
   }
 }
