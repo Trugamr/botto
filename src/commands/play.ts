@@ -60,21 +60,23 @@ export default class Play implements Command {
       url = result.data
     } else {
       // Otherwise, try to search for a track
-      let result: Awaited<ReturnType<Youtube['search']>>
+      let videos: Awaited<ReturnType<Youtube['search']>>
       try {
-        result = await this.youtube.search(query)
+        videos = await this.youtube.search(query)
       } catch (error) {
         await interaction.editReply('An error occurred while searching')
         return
       }
-      const video = result.items.find(item => item.type === 'video')
-      if (!video) {
+      if (videos.length === 0) {
         await interaction.editReply('No results found')
         return
       }
 
-      invariant(video.type === 'video', 'video type should be video')
-      url = video.url
+      url = videos[0].endpoint.toURL()
+      if (!url) {
+        await interaction.editReply('An error occurred while getting video url')
+        return
+      }
     }
 
     // Get connection
@@ -127,18 +129,21 @@ export default class Play implements Command {
     // TODO: Query different sources for results
 
     try {
-      const { items } = await this.youtube.search(query, { limit: 16 })
-      const options: ApplicationCommandOptionChoiceData<string>[] = items
-        .filter(item => item.type === 'video')
-        .map(item => {
-          invariant(item.type === 'video', 'item type should be video')
+      const videos = await this.youtube.search(query)
+      const options: ApplicationCommandOptionChoiceData<string>[] = videos
+        // Keep only videos that have a url
+        .filter(video => video.endpoint.toURL())
+        .map(video => {
+          let title = video.title.toString()
           // Upto 100 characters are allowed in option names in discord api
-          const name = item.title.length > 100 ? `${item.title.slice(0, 97)}...` : item.title
-
-          return {
-            name,
-            value: item.url,
+          if (title.length > 100) {
+            title = `${title.slice(0, 97)}...`
           }
+
+          const url = video.endpoint.toURL()
+          invariant(url, 'video url should not be undefined')
+
+          return { name: title, value: url }
         })
       await interaction.respond(options)
     } catch (error) {
