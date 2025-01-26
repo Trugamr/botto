@@ -26,13 +26,13 @@ export default class Play implements Command {
         .setName('query')
         .setDescription('Query tracks or send a link to play')
         .setAutocomplete(true)
-        .setRequired(true),
+        .setRequired(true)
     )
     .addBooleanOption(option =>
       option
         .setName('prepend')
         .setDescription('Add to the front of the queue')
-        .setRequired(false),
+        .setRequired(false)
     )
   readonly features = [Feature.Voice]
 
@@ -40,7 +40,7 @@ export default class Play implements Command {
     @inject(TYPES.Voice) private readonly voice: Voice,
     @inject(TYPES.Players) private readonly players: Players,
     @inject(TYPES.Logger) private readonly logger: Logger,
-    @inject(TYPES.Youtube) private readonly youtube: Youtube,
+    @inject(TYPES.Youtube) private readonly youtube: Youtube
   ) {}
 
   async handle(interaction: ChatInputCommandInteraction) {
@@ -96,7 +96,7 @@ export default class Play implements Command {
         await interaction.editReply(
           `Queued **${queued.count}** ${queued.count > 1 ? 'tracks' : 'track'} from **${
             queued.title
-          }**`,
+          }**`
         )
         return
       }
@@ -133,6 +133,7 @@ export default class Play implements Command {
       const options: ApplicationCommandOptionChoiceData<string>[] = videos
         // Keep only videos that have a url
         .filter(video => video.endpoint.toURL())
+        .slice(0, 25) // Max 25 results allowed by Discord API
         .map(video => {
           let title = video.title.toString()
           // Upto 100 characters are allowed in option names in discord api
