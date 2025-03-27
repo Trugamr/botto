@@ -5,6 +5,7 @@ ENV PATH="$PNPM_HOME/bin:$PATH"
 
 # Enable corepack to use pnpm
 RUN corepack enable
+RUN corepack prepare pnpm@9.15.4 --activate
 
 WORKDIR /app
 
